@@ -35,6 +35,9 @@ const Car = forwardRef<Mesh>((_, ref) => {
   }, [api])
 
   useFrame(() => {
+
+    if (!physicsRef.current) return
+    
     const speed = 5
     const turnSpeed = 1.5
 
