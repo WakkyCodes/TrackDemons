@@ -1,69 +1,82 @@
-# React + TypeScript + Vite
+# 🚀 High Octane Racer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A blazing-fast 3D car game built with React, Three.js, and Vite. Get ready for a world of dynamic racing, thrilling stunts, and high-energy physics!
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🏁 Getting Started
 
-## Expanding the ESLint configuration
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+You need to have **Node.js** (version 18.x or later) and **npm** installed on your system.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- [Node.js](https://nodejs.org/)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Installation & Setup
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Follow these simple steps to get the development environment running:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1.  **Clone the repository**
+    ```sh
+    git clone [https://github.com/wakkycodes/TrackDemons.git](https://github.com/wakkycodes/TrackDemons.git)
+    ```
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2.  **Navigate to the project directory**
+    ```sh
+    cd trackdemons
+    ```
+
+3.  **Install dependencies**
+    ```sh
+    npm install
+    ```
+    > **Note on `npm ci`**: While you mentioned `npm ci`, it's best to use `npm install` for local development. `npm ci` is mainly for automated environments (like GitHub Actions) to ensure a clean, exact install from the `package-lock.json` file.
+
+4.  **Run the development server**
+    ```sh
+    npm run dev
+    ```
+    Your project should now be running on `http://localhost:5173` (or the next available port).
+
+---
+
+## 🎮 Controls
+
+| Key             | Action              |
+| :-------------- | :------------------ |
+| `W` / `ArrowUp` | Accelerate Forward  |
+| `S` / `ArrowDown`| Brake / Reverse     |
+| `A` / `ArrowLeft`| Turn Left           |
+| `D` / `ArrowRight`| Turn Right          |
+
+---
+
+## 🛠️ Tech Stack
+
+This project is built with a modern, high-performance tech stack:
+
+-   **[React](https://reactjs.org/):** A JavaScript library for building user interfaces.
+-   **[Vite](https://vitejs.dev/):** A next-generation frontend tooling that provides a faster and leaner development experience.
+-   **[Three.js](https://threejs.org/):** The core 3D library for creating and displaying animated 3D graphics in a web browser.
+-   **[React Three Fiber](https://docs.pmnd.rs/react-three-fiber):** A React renderer for Three.js, making it easy to build 3D scenes declaratively.
+-   **[React Three Cannon](https://docs.pmnd.rs/react-three-cannon):** Physics bindings for React Three Fiber, enabling realistic object interactions.
+-   **[TypeScript](https://www.typescriptlang.org/):** A typed superset of JavaScript that compiles to plain JavaScript.
+
+---
+
+## 🗺️ Roadmap
+
+Here are some of the features planned for the future:
+
+-   [x] Basic car physics and keyboard controls
+-   [ ] Stunt ramps, loops, and dynamic obstacles
+-   [ ] UI for speedometer and race info
+-   [ ] Multiple camera modes (First-person, Cinematic)
+-   [ ] Sound effects for engine, collisions, and environment
+-   [ ] Selection of different car models with unique stats
+
+---
+
+## 📄 License
+
