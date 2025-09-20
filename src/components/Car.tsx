@@ -35,26 +35,29 @@ const Car = forwardRef<Mesh>((_, ref) => {
   }, [api])
 
   useFrame(() => {
-
+    // Ensure physics body is ready
     if (!physicsRef.current) return
-    
+    if (!api.velocity || !api.angularVelocity) return
+
     const speed = 5
     const turnSpeed = 1.5
 
     const moveDirection = keys.forward ? 1 : keys.backward ? -1 : 0
     const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
 
-    // Set angular velocity for turning
-    api.angularVelocity.set(0, turnDirection * turnSpeed, 0)
+    if (turnDirection !== 0) {
+      api.angularVelocity.set(0, turnDirection * turnSpeed, 0)
+    }
 
-    // Calculate forward vector based on current rotation
-    const forwardVector = new Vector3(0, 0, -moveDirection * speed)
-    const carQuaternion = new Quaternion().fromArray(rotation.current)
-    const worldDirection = forwardVector.applyQuaternion(carQuaternion)
+    if (moveDirection !== 0) {
+      const forwardVector = new Vector3(0, 0, -moveDirection * speed)
+      const carQuaternion = new Quaternion().fromArray(rotation.current)
+      const worldDirection = forwardVector.applyQuaternion(carQuaternion)
 
-    // Set velocity, preserving gravity
-    api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
+      api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
+    }
   })
+
 
   return (
     <mesh 

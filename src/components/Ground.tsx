@@ -12,7 +12,7 @@ export default function Ground() {
 
   return (
     <mesh ref={groundRef} receiveShadow>
-      <planeGeometry args={[40, 80]} />
+      <planeGeometry args={[14, 300]} />
       <meshStandardMaterial color="black" />
     </mesh>
   )
