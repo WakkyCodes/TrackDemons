@@ -30,7 +30,7 @@ export default function App() {
         {/* Camera logic */}
         <CameraController target={carRef} isFirstPerson={isFirstPerson} />
 
-        <Environment files={`${import.meta.env.BASE_URL}sky_4k.hdr`} background />
+        <Environment files={`${import.meta.env.BASE_URL}clearsky_4k.hdr`} background />
 
       </Canvas>
 

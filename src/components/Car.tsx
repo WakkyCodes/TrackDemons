@@ -5,10 +5,7 @@ import { forwardRef, useEffect, useRef, useImperativeHandle } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
 
 const Car = forwardRef<Mesh>((_, ref) => {
-  // Create a separate mesh ref
-  const meshRef = useRef<Mesh>(null)
-  
-  const [physicsRef, api] = useBox(() => ({
+  const [physicsRef, api] = useBox<Mesh>(() => ({
     mass: 1,
     position: [0, 0.5, 0],
     args: [1, 0.5, 2],
@@ -16,8 +13,8 @@ const Car = forwardRef<Mesh>((_, ref) => {
     angularDamping: 0.95,
   }))
 
-  // Forward the mesh ref to parent
-  useImperativeHandle(ref, () => meshRef.current!, [])
+  // Forward Cannon's physics ref to parent
+  useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
 
   const keys = useKeyboard()
 
@@ -25,19 +22,16 @@ const Car = forwardRef<Mesh>((_, ref) => {
   const rotation = useRef([0, 0, 0, 1]) // Quaternion [x, y, z, w]
 
   useEffect(() => {
-    const unsubscribeVelocity = api.velocity.subscribe((v) => (velocity.current = v))
-    const unsubscribeRotation = api.quaternion.subscribe((r) => (rotation.current = r))
-
+    const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
+    const unsubR = api.quaternion.subscribe((r) => (rotation.current = r))
     return () => {
-      unsubscribeVelocity()
-      unsubscribeRotation()
+      unsubV()
+      unsubR()
     }
   }, [api])
 
   useFrame(() => {
-    // Ensure physics body is ready
     if (!physicsRef.current) return
-    if (!api.velocity || !api.angularVelocity) return
 
     const speed = 5
     const turnSpeed = 1.5
@@ -58,17 +52,8 @@ const Car = forwardRef<Mesh>((_, ref) => {
     }
   })
 
-
   return (
-    <mesh 
-      ref={(mesh) => {
-        meshRef.current = mesh
-        if (physicsRef.current && mesh) {
-          physicsRef.current = mesh
-        }
-      }} 
-      castShadow
-    >
+    <mesh ref={physicsRef} castShadow>
       <boxGeometry args={[1, 0.5, 2]} />
       <meshStandardMaterial color="orange" />
     </mesh>
