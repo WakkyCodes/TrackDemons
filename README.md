@@ -19,7 +19,7 @@ Follow these simple steps to get the development environment running:
 
 1.  **Clone the repository**
     ```sh
-    git clone [https://github.com/wakkycodes/TrackDemons.git](https://github.com/wakkycodes/TrackDemons.git)
+    git clone [https://github.com/wakkycodes/TrackDemons.git]
     ```
 
 2.  **Navigate to the project directory**
