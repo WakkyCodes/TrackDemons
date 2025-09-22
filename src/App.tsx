@@ -3,7 +3,7 @@ import { Environment } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
 import { useRef, useState } from 'react'
 import { Mesh } from 'three'
-
+import FollowCam from './components/FollowCam'
 import Car from './components/Car'
 import Ground from './components/Ground'
 import Lights from './components/Lights'
@@ -23,6 +23,7 @@ export default function App() {
         <Lights />
 
         <Physics gravity={[0, -9.82, 0]}>
+           <FollowCam target={carRef} enabled={true} />
           <Ground />
           <Car ref={carRef} />
         </Physics>
@@ -33,7 +34,7 @@ export default function App() {
         <Environment files={`${import.meta.env.BASE_URL}clearsky_4k.hdr`} background />
 
       </Canvas>
-
+        
       {/* UI overlay button */}
       <div
         style={{
