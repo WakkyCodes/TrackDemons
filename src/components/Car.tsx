@@ -7,8 +7,9 @@ import useKeyboard from '../hooks/useKeyboard'
 const Car = forwardRef<Mesh>((_, ref) => {
   const [physicsRef, api] = useBox<Mesh>(() => ({
     mass: 1,
-    position: [0, 0.5, 0],
-    args: [1, 0.5, 2],
+    position: [9, 2.5, -7],//z towards neg is backward positive is forward 
+    //x towards pos is left neg is right
+    args: [1, 10.5, 2],
     linearDamping: 0.95,
     angularDamping: 0.95,
   }))

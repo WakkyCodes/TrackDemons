@@ -10,7 +10,7 @@ type FollowCameraProps = {
 
 export default function FollowCam({ target, enabled }: FollowCameraProps) {
   const { camera } = useThree()
-  const camOffset = useRef(new Vector3(0, 3, -6))
+  const camOffset = useRef(new Vector3(9, 3, -10))
 
   useFrame(() => {
     if (!enabled || !target.current) return

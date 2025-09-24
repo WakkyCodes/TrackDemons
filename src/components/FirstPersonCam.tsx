@@ -10,7 +10,7 @@ type FirstPersonCamProps = {
 
 export default function FirstPersonCam({ target, enabled }: FirstPersonCamProps) {
   const { camera } = useThree()
-  const offset = useRef(new Vector3(0, 0.3, 0.5)) // Slightly above and in front of car center
+  const offset = useRef(new Vector3(0, 0.3, 10)) // Slightly above and in front of car center
 
   useFrame(() => {
     if (!enabled || !target.current) return
