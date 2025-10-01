@@ -10,11 +10,14 @@ import {
   useState,
 } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
-import { Html, useGLTF } from '@react-three/drei'
-import {CarHUD} from './CarHud'
-import HUDOverlay from './HUDOverlay'
+import { useGLTF } from '@react-three/drei'
+import { CarHUD } from './CarHud'
 
-const Car = forwardRef<Mesh>((_, ref) => {
+interface CarProps {
+  onHudUpdate?: (data: { speed: number; gear: string }) => void
+}
+
+const Car = forwardRef<Mesh, CarProps>(({ onHudUpdate }, ref) => {
   const [physicsRef, api] = useBox<Mesh>(() => ({
     mass: 250,
     position: [0, 2, 0],
@@ -33,6 +36,11 @@ const Car = forwardRef<Mesh>((_, ref) => {
   const [carVelocity, setCarVelocity] = useState([0, 0, 0])
   const [speed, setSpeed] = useState(0)
   const [gear, setGear] = useState('N')
+
+  // Notify parent component when HUD data changes
+  useEffect(() => {
+    onHudUpdate?.({ speed, gear })
+  }, [speed, gear, onHudUpdate])
 
   useEffect(() => {
     const unsubscribe = api.velocity.subscribe((v) => {
@@ -124,22 +132,16 @@ const Car = forwardRef<Mesh>((_, ref) => {
       {/* The car mesh */}
       <mesh ref={physicsRef} castShadow>
         <primitive object={scene} scale={0.01} />
-            <Html position={[-14, -4, 0]} center>
-  <HUDOverlay speed={speed} gear={gear} />
-</Html>
       </mesh>
 
       {/* Physics-driven HUD logic */}
       <CarHUD
-  carApi={{ velocity: carVelocity }}
-  onUpdate={(speed, gear) => {
-    setSpeed(speed)
-    setGear(gear)
-  }}
-/>
-
-      {/* Fixed bottom-right UI */}
-  
+        carApi={{ velocity: carVelocity }}
+        onUpdate={(speed, gear) => {
+          setSpeed(speed)
+          setGear(gear)
+        }}
+      />
     </>
   )
 })
