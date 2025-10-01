@@ -31,7 +31,7 @@ export default function App() {
 
         <Physics gravity={[0, -9.82, 0]}>
           <ReflectiveGround />
-          <FollowCam target={carRef} enabled={true} />
+          <FollowCam target={carRef} enabled={!isFirstPerson} />
 
           {currentLevel === 1 && <Track01 />}
           {currentLevel === 2 && <Track02 />}
@@ -49,7 +49,12 @@ export default function App() {
         <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
       </Canvas>
 
+      {/* Conditional HUD Rendering */}
+     {isFirstPerson ? (
+      <FirstPersonHUD speed={hudData.speed} gear={hudData.gear} />
+    ) : (
       <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
+    )}
       {/* UI Controls */}
       <div
         style={{
