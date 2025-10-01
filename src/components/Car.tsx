@@ -1,4 +1,3 @@
-// Car.tsx
 import { useBox } from '@react-three/cannon'
 import { useFrame } from '@react-three/fiber'
 import { Mesh, Quaternion, Vector3 } from 'three'
@@ -11,140 +10,137 @@ import {
 } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
 import { useGLTF } from '@react-three/drei'
-import { CarHUD } from './CarHud'
 
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
+  startPosition?: [number, number, number]
 }
 
-const Car = forwardRef<Mesh, CarProps>(({ onHudUpdate }, ref) => {
-  const [physicsRef, api] = useBox<Mesh>(() => ({
-    mass: 250,
-    position: [0, 2, 0],
-    args: [1, 0.5, 2],
-    linearDamping: 0.4,
-    angularDamping: 0.4,
-    material: {
-      friction: 0.5,
-      restitution: 0.1,
-    },
-    angularFactor: [0, 1, 0],
-  }))
+const Car = forwardRef<Mesh, CarProps>(
+  ({ onHudUpdate, startPosition = [9, 2.5, -7] }, ref) => {
+    const [physicsRef, api] = useBox<Mesh>(() => ({
+      mass: 250,
+      position: startPosition,
+      args: [1, 0.5, 2],
+      linearDamping: 0.4,
+      angularDamping: 0.4,
+      material: {
+        friction: 0.5,
+        restitution: 0.1,
+      },
+      angularFactor: [0, 1, 0],
+    }))
 
-  useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
+    useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
 
-  const [carVelocity, setCarVelocity] = useState([0, 0, 0])
-  const [speed, setSpeed] = useState(0)
-  const [gear, setGear] = useState('N')
+    const [speed, setSpeed] = useState(0)
+    const [gear, setGear] = useState('N')
 
-  // Notify parent component when HUD data changes
-  useEffect(() => {
-    onHudUpdate?.({ speed, gear })
-  }, [speed, gear, onHudUpdate])
+    const keys = useKeyboard()
 
-  useEffect(() => {
-    const unsubscribe = api.velocity.subscribe((v) => {
-      setCarVelocity(v)
-    })
-    return unsubscribe
-  }, [api])
+    const velocity = useRef([0, 0, 0])
+    const rotation = useRef([0, 0, 0, 1])
 
-  const keys = useKeyboard()
+    const currentSpeed = useRef(0)
+    const targetSpeed = useRef(0)
 
-  const velocity = useRef([0, 0, 0])
-  const rotation = useRef([0, 0, 0, 1])
-  const position = useRef([0, 0, 0])
+    useEffect(() => {
+      const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
+      const unsubR = api.quaternion.subscribe((r) => (rotation.current = r))
+      return () => {
+        unsubV()
+        unsubR()
+      }
+    }, [api])
 
-  const currentSpeed = useRef(0)
-  const targetSpeed = useRef(0)
+    useFrame((_, delta) => {
+      if (!physicsRef.current) return
 
-  useEffect(() => {
-    const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
-    const unsubR = api.quaternion.subscribe((r) => (rotation.current = r))
-    const unsubP = api.position.subscribe((p) => (position.current = p))
-    return () => {
-      unsubV()
-      unsubR()
-      unsubP()
-    }
-  }, [api])
+      const maxSpeed = 50
+      const acceleration = 7
+      const deceleration = 3
+      const turnSpeed = 4
 
-  useFrame((_, delta) => {
-    if (!physicsRef.current) return
-
-    const maxSpeed = 50
-    const acceleration = 7
-    const deceleration = 3
-    const turnSpeed = 4
-
-    if (keys.forward) {
-      targetSpeed.current = -maxSpeed
-    } else if (keys.backward) {
-      targetSpeed.current = 5
-    } else {
-      targetSpeed.current = 0
-    }
-
-    if (currentSpeed.current < targetSpeed.current) {
-      currentSpeed.current += acceleration * delta
-      currentSpeed.current = Math.min(currentSpeed.current, targetSpeed.current)
-    } else if (currentSpeed.current > targetSpeed.current) {
-      currentSpeed.current -= deceleration * delta
-      currentSpeed.current = Math.max(currentSpeed.current, targetSpeed.current)
-    }
-
-    const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
-
-    if (turnDirection === 0) {
-      api.angularVelocity.set(0, 0, 0)
-    } else {
-      const turnIntensity = Math.min(
-        1,
-        Math.abs(currentSpeed.current) / maxSpeed,
-      )
-
-      let effectiveTurnDirection = turnDirection
-      if (currentSpeed.current > 0) {
-        effectiveTurnDirection = -turnDirection
+      // Speed control
+      if (keys.forward) {
+        targetSpeed.current = -maxSpeed
+      } else if (keys.backward) {
+        targetSpeed.current = 5
+      } else {
+        targetSpeed.current = 0
       }
 
-      const finalTurnSpeed = effectiveTurnDirection * turnSpeed * turnIntensity
-      api.angularVelocity.set(0, finalTurnSpeed, 0)
-    }
+      if (currentSpeed.current < targetSpeed.current) {
+        currentSpeed.current += acceleration * delta
+        currentSpeed.current = Math.min(currentSpeed.current, targetSpeed.current)
+      } else if (currentSpeed.current > targetSpeed.current) {
+        currentSpeed.current -= deceleration * delta
+        currentSpeed.current = Math.max(currentSpeed.current, targetSpeed.current)
+      }
 
-    if (Math.abs(currentSpeed.current) > 0.01) {
-      const forwardVector = new Vector3(0, 0, -1)
-      const carQuaternion = new Quaternion().fromArray(rotation.current)
-      const worldDirection = forwardVector.applyQuaternion(carQuaternion)
+      // Turn control
+      const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
 
-      worldDirection.multiplyScalar(currentSpeed.current)
-      api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
-    } else if (turnDirection === 0) {
-      currentSpeed.current = 0
-      api.velocity.set(0, velocity.current[1], 0)
-    }
-  })
+      if (turnDirection === 0) {
+        api.angularVelocity.set(0, 0, 0)
+      } else {
+        const turnIntensity = Math.min(
+          1,
+          Math.abs(currentSpeed.current) / maxSpeed
+        )
 
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+        let effectiveTurnDirection = turnDirection
+        if (currentSpeed.current > 0) {
+          effectiveTurnDirection = -turnDirection
+        }
 
-  return (
-    <>
-      {/* The car mesh */}
+        const finalTurnSpeed = effectiveTurnDirection * turnSpeed * turnIntensity
+        api.angularVelocity.set(0, finalTurnSpeed, 0)
+      }
+
+      // Apply movement
+      if (Math.abs(currentSpeed.current) > 0.01) {
+        const forwardVector = new Vector3(0, 0, -1)
+        const carQuaternion = new Quaternion().fromArray(rotation.current)
+        const worldDirection = forwardVector.applyQuaternion(carQuaternion)
+
+        worldDirection.multiplyScalar(currentSpeed.current)
+        api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
+      } else if (turnDirection === 0) {
+        currentSpeed.current = 0
+        api.velocity.set(0, velocity.current[1], 0)
+      }
+
+      // Calculate HUD data
+      const [vx, , vz] = velocity.current
+      const speedMs = Math.sqrt(vx * vx + vz * vz)
+      const speedKmh = Math.abs(speedMs * 3.6)
+
+      // Determine gear
+      let currentGear = 'N'
+      if (speedKmh === 0) currentGear = 'N'
+      else if (speedKmh < 30) currentGear = '1'
+      else if (speedKmh < 60) currentGear = '2'
+      else if (speedKmh < 90) currentGear = '3'
+      else currentGear = '4'
+
+      // Update state and parent
+      if (Math.abs(speedKmh - speed) > 0.5 || currentGear !== gear) {
+        setSpeed(speedKmh)
+        setGear(currentGear)
+        onHudUpdate?.({ speed: speedKmh, gear: currentGear })
+      }
+    })
+
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+
+    return (
       <mesh ref={physicsRef} castShadow>
         <primitive object={scene} scale={0.01} />
       </mesh>
-
-      {/* Physics-driven HUD logic */}
-      <CarHUD
-        carApi={{ velocity: carVelocity }}
-        onUpdate={(speed, gear) => {
-          setSpeed(speed)
-          setGear(gear)
-        }}
-      />
-    </>
-  )
-})
+    )
+  }
+)
 
 Car.displayName = 'Car'
 export default Car
