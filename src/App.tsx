@@ -28,11 +28,13 @@ export default function App() {
           <Car ref={carRef} />
         </Physics>
 
+        <></>
+
         {/* Camera logic */}
         <CameraController target={carRef} isFirstPerson={isFirstPerson} />
 
         <Environment files={`${import.meta.env.BASE_URL}clearsky_4k.hdr`} background />
-
+        
       </Canvas>
         
       {/* UI overlay button */}

@@ -1,4 +1,5 @@
 // components/Speedometer.tsx
+
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import { Text } from '@react-three/drei'
@@ -29,7 +30,7 @@ const Speedometer = ({ carApi, position = [0, 2, 0], visible = true }: Speedomet
     <Text
       ref={textRef}
       position={position}
-      fontSize={0.3}
+      fontSize={2}
       color="white"
       anchorX="center"
       anchorY="middle"
