@@ -10,6 +10,7 @@ import Ground from './components/Ground'
 import Lights from './components/Lights'
 import CameraController from './components/CameraController'
 import HUDOverlay from './components/HUDOverlay'
+import FirstPersonHUD from './components/FirstPersonHUD'
 
 export default function App() {
   const carRef = useRef<Mesh>(null)
@@ -26,7 +27,7 @@ export default function App() {
         <Lights />
 
         <Physics gravity={[0, -9.82, 0]}>
-          <FollowCam target={carRef} enabled={true} />
+          <FollowCam target={carRef} enabled={!isFirstPerson} />
           <Ground />
           <Car ref={carRef} onHudUpdate={setHudData} />
         </Physics>
@@ -37,8 +38,12 @@ export default function App() {
         <Environment files={`${import.meta.env.BASE_URL}clearsky_4k.hdr`} background />
       </Canvas>
       
-      {/* HUD Overlay - completely outside Canvas */}
-      <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
+      {/* Conditional HUD Rendering */}
+     {isFirstPerson ? (
+  <FirstPersonHUD speed={hudData.speed} gear={hudData.gear} />
+) : (
+  <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
+)}
         
       {/* UI overlay button */}
       <div
