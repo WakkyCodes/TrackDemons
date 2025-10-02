@@ -37,7 +37,7 @@ export default function ControlsPopup() {
         <li>S / ↓ – Brake / Reverse</li>
         <li>A / ← – Steer Left</li>
         <li>D / → – Steer Right</li>
-        <li>C / → – Change Camera</li>
+        <li>C – Change Camera</li>
         <li>Space – Handbrake</li>
       </ul>
       <button
