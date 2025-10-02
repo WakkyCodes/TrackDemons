@@ -1,66 +1,146 @@
 import { useBox } from '@react-three/cannon'
 import { useFrame } from '@react-three/fiber'
 import { Mesh, Quaternion, Vector3 } from 'three'
-import { forwardRef, useEffect, useRef, useImperativeHandle } from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  useState,
+} from 'react'
 import useKeyboard from '../hooks/useKeyboard'
+import { useGLTF } from '@react-three/drei'
 
-const Car = forwardRef<Mesh>((_, ref) => {
-  const [physicsRef, api] = useBox<Mesh>(() => ({
-    mass: 1,
-    position: [9, 2.5, -7],//z towards neg is backward positive is forward 
-    //x towards pos is left neg is right
-    args: [1, 10.5, 2],
-    linearDamping: 0.95,
-    angularDamping: 0.95,
-  }))
+interface CarProps {
+  onHudUpdate?: (data: { speed: number; gear: string }) => void
+  startPosition?: [number, number, number]
+}
 
-  // Forward Cannon's physics ref to parent
-  useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
+const Car = forwardRef<Mesh, CarProps>(
+  ({ onHudUpdate, startPosition = [9, 2.5, -7] }, ref) => {
+    const [physicsRef, api] = useBox<Mesh>(() => ({
+      mass: 250,
+      position: startPosition,
+      args: [1, 0.5, 2],
+      linearDamping: 0.4,
+      angularDamping: 0.4,
+      material: {
+        friction: 0.5,
+        restitution: 0.1,
+      },
+      angularFactor: [0, 1, 0],
+    }))
 
-  const keys = useKeyboard()
+    useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
 
-  const velocity = useRef([0, 0, 0])
-  const rotation = useRef([0, 0, 0, 1]) // Quaternion [x, y, z, w]
+    const [speed, setSpeed] = useState(0)
+    const [gear, setGear] = useState('N')
 
-  useEffect(() => {
-    const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
-    const unsubR = api.quaternion.subscribe((r) => (rotation.current = r))
-    return () => {
-      unsubV()
-      unsubR()
-    }
-  }, [api])
+    const keys = useKeyboard()
 
-  useFrame(() => {
-    if (!physicsRef.current) return
+    const velocity = useRef([0, 0, 0])
+    const rotation = useRef([0, 0, 0, 1])
 
-    const speed = 5
-    const turnSpeed = 1.5
+    const currentSpeed = useRef(0)
+    const targetSpeed = useRef(0)
 
-    const moveDirection = keys.forward ? 1 : keys.backward ? -1 : 0
-    const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
+    useEffect(() => {
+      const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
+      const unsubR = api.quaternion.subscribe((r) => (rotation.current = r))
+      return () => {
+        unsubV()
+        unsubR()
+      }
+    }, [api])
 
-    if (turnDirection !== 0) {
-      api.angularVelocity.set(0, turnDirection * turnSpeed, 0)
-    }
+    useFrame((_, delta) => {
+      if (!physicsRef.current) return
 
-    if (moveDirection !== 0) {
-      const forwardVector = new Vector3(0, 0, -moveDirection * speed)
-      const carQuaternion = new Quaternion().fromArray(rotation.current)
-      const worldDirection = forwardVector.applyQuaternion(carQuaternion)
+      const maxSpeed = 50
+      const acceleration = 7
+      const deceleration = 3
+      const turnSpeed = 4
 
-      api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
-    }
-  })
+      // Speed control
+      if (keys.forward) {
+        targetSpeed.current = -maxSpeed
+      } else if (keys.backward) {
+        targetSpeed.current = 5
+      } else {
+        targetSpeed.current = 0
+      }
 
-  return (
-    <mesh ref={physicsRef} castShadow>
-      <boxGeometry args={[1, 0.5, 2]} />
-      <meshStandardMaterial color="orange" />
-    </mesh>
-  )
-})
+      if (currentSpeed.current < targetSpeed.current) {
+        currentSpeed.current += acceleration * delta
+        currentSpeed.current = Math.min(currentSpeed.current, targetSpeed.current)
+      } else if (currentSpeed.current > targetSpeed.current) {
+        currentSpeed.current -= deceleration * delta
+        currentSpeed.current = Math.max(currentSpeed.current, targetSpeed.current)
+      }
+
+      // Turn control
+      const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
+
+      if (turnDirection === 0) {
+        api.angularVelocity.set(0, 0, 0)
+      } else {
+        const turnIntensity = Math.min(
+          1,
+          Math.abs(currentSpeed.current) / maxSpeed
+        )
+
+        let effectiveTurnDirection = turnDirection
+        if (currentSpeed.current > 0) {
+          effectiveTurnDirection = -turnDirection
+        }
+
+        const finalTurnSpeed = effectiveTurnDirection * turnSpeed * turnIntensity
+        api.angularVelocity.set(0, finalTurnSpeed, 0)
+      }
+
+      // Apply movement
+      if (Math.abs(currentSpeed.current) > 0.01) {
+        const forwardVector = new Vector3(0, 0, -1)
+        const carQuaternion = new Quaternion().fromArray(rotation.current)
+        const worldDirection = forwardVector.applyQuaternion(carQuaternion)
+
+        worldDirection.multiplyScalar(currentSpeed.current)
+        api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
+      } else if (turnDirection === 0) {
+        currentSpeed.current = 0
+        api.velocity.set(0, velocity.current[1], 0)
+      }
+
+      // Calculate HUD data
+      const [vx, , vz] = velocity.current
+      const speedMs = Math.sqrt(vx * vx + vz * vz)
+      const speedKmh = Math.abs(speedMs * 3.6)
+
+      // Determine gear
+      let currentGear = 'N'
+      if (speedKmh === 0) currentGear = 'N'
+      else if (speedKmh < 30) currentGear = '1'
+      else if (speedKmh < 60) currentGear = '2'
+      else if (speedKmh < 90) currentGear = '3'
+      else currentGear = '4'
+
+      // Update state and parent
+      if (Math.abs(speedKmh - speed) > 0.5 || currentGear !== gear) {
+        setSpeed(speedKmh)
+        setGear(currentGear)
+        onHudUpdate?.({ speed: speedKmh, gear: currentGear })
+      }
+    })
+
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+
+    return (
+      <mesh ref={physicsRef} castShadow>
+        <primitive object={scene} scale={0.01} />
+      </mesh>
+    )
+  }
+)
 
 Car.displayName = 'Car'
-
 export default Car

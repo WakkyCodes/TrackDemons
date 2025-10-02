@@ -1,34 +1,52 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { useRef } from 'react'
-import { Vector3 } from 'three'
-import { Mesh } from 'three'
+import { useMemo, useRef } from 'react'
+import { Mesh, Object3D, Quaternion, Vector3 } from 'three'
 
 type FollowCameraProps = {
-  target: React.RefObject<Mesh | null>
-  enabled: boolean  // Add this line
+  target: React.RefObject<Mesh | Object3D | null>
+  enabled: boolean
 }
 
 export default function FollowCam({ target, enabled }: FollowCameraProps) {
   const { camera } = useThree()
-  const camOffset = useRef(new Vector3(9, 3, -10))
 
-  useFrame(() => {
-    if (!enabled || !target.current) return
+  // Base boom offset: up and behind the car in its local space
+  const baseOffset = useMemo(() => new Vector3(0, 4, -8), [])
+  const tmpPos = useRef(new Vector3())
+  const tmpLook = useRef(new Vector3())
+  const worldPos = useRef(new Vector3())
+  const worldQuat = useRef(new Quaternion())
+  const rotatedOffset = useRef(new Vector3())
+  const smoothLook = useRef(new Vector3())
 
-    const targetPos = target.current.position
+  useFrame((_, delta) => {
+    if (!enabled) return
+    const t = target.current
+    if (!t) return
 
-    // Desired camera position behind the car
-    const desiredPos = new Vector3(
-      targetPos.x + camOffset.current.x,
-      targetPos.y + camOffset.current.y,
-      targetPos.z + camOffset.current.z
+    // Get car's world transform safely
+    t.getWorldPosition(worldPos.current)
+    t.getWorldQuaternion(worldQuat.current)
+
+    // Rotate the local offset by the car's orientation (without mutating the base offset)
+    rotatedOffset.current.copy(baseOffset).applyQuaternion(worldQuat.current)
+
+    // Desired camera position: car world pos + rotated offset
+    const desiredPos = tmpPos.current.addVectors(worldPos.current, rotatedOffset.current)
+
+    // Frame-rate independent smoothing (higher = snappier)
+    const lerp = 1 - Math.pow(0.001, delta)
+
+    camera.position.lerp(desiredPos, lerp)
+
+    // Look slightly above the car’s center for a steady horizon
+    const desiredLook = tmpLook.current.set(
+      worldPos.current.x,
+      worldPos.current.y + 1.6,
+      worldPos.current.z
     )
-
-    // Smooth camera movement
-    camera.position.lerp(desiredPos, 0.1)
-
-    // Make the camera look at the car
-    camera.lookAt(targetPos)
+    smoothLook.current.lerp(desiredLook, lerp)
+    camera.lookAt(smoothLook.current)
   })
 
   return null
