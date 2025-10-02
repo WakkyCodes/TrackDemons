@@ -1,7 +1,8 @@
+// App.tsx
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Mesh } from 'three'
 
 import Car from './components/Car'
@@ -13,13 +14,21 @@ import CameraController from './components/CameraController'
 import ReflectiveGround from './components/ReflectiveGround'
 import HUDOverlay from './components/HUDOverlay'
 import FirstPersonHUD from './components/FirstPersonHUD'
+import useKeyboard from './hooks/useKeyboard'
 
 export default function App() {
   const carRef = useRef<Mesh>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [currentLevel, setCurrentLevel] = useState(1)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
+  const keys = useKeyboard()
 
+  // Use the useKeyboard hook to detect 'C' key press
+  useEffect(() => {
+    if (keys.c) {
+      setIsFirstPerson(prev => !prev)
+    }
+  }, [keys.c])
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -51,12 +60,13 @@ export default function App() {
       </Canvas>
 
       {/* Conditional HUD Rendering */}
-     {isFirstPerson ? (
-      <FirstPersonHUD speed={hudData.speed} gear={hudData.gear} />
-    ) : (
-      <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
-    )}
-      {/* UI Controls */}
+      {isFirstPerson ? (
+        <FirstPersonHUD speed={hudData.speed} gear={hudData.gear} />
+      ) : (
+        <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
+      )}
+
+      {/* UI Controls - ONLY TRACK BUTTONS REMAIN */}
       <div
         style={{
           position: 'absolute',
@@ -101,41 +111,6 @@ export default function App() {
         </button>
       </div>
 
-      <div
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          zIndex: 1000,
-        }}
-      >
-        {/* 3. Add UI buttons to change the level */}
-      <div style={{ position: 'absolute', top: '50px',  left: '0px', zIndex: 1000, display: 'flex', gap: '10px' }}>
-        <button onClick={() => setCurrentLevel(1)} style={{ padding: '10px', backgroundColor: currentLevel === 1 ? 'dodgerblue' : 'grey', color: 'white', border: 'none', borderRadius: '5px' }}>
-          Level 1
-        </button>
-        <button onClick={() => setCurrentLevel(2)} style={{ padding: '10px', backgroundColor: currentLevel === 2 ? 'dodgerblue' : 'grey', color: 'white', border: 'none', borderRadius: '5px' }}>
-          Level 2
-        </button>
-      </div>
-
-        <button
-          onClick={() => setIsFirstPerson(!isFirstPerson)}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: isFirstPerson ? '#4CAF50' : '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }}
-        >
-          {isFirstPerson ? '1st Person' : '3rd Person'}
-        </button>
-      </div>
     </div>
   )
 }

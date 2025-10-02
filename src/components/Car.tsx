@@ -17,11 +17,11 @@ interface CarProps {
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 2.5, -7] }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7] }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
-      mass: 250,
+      mass: 400,
       position: startPosition,
-      args: [1, 0.5, 2],
+      args: [0, 0.5, 2],
       linearDamping: 0.4,
       angularDamping: 0.4,
       material: {
@@ -59,7 +59,7 @@ const Car = forwardRef<Mesh, CarProps>(
       const maxSpeed = 50
       const acceleration = 7
       const deceleration = 3
-      const turnSpeed = 4
+      const turnSpeed = 8
 
       // Speed control
       if (keys.forward) {
@@ -136,7 +136,9 @@ const Car = forwardRef<Mesh, CarProps>(
 
     return (
       <mesh ref={physicsRef} castShadow>
-        <primitive object={scene} scale={0.01} />
+       <group position={[-3.5, 0, 0]}>
+    <primitive object={scene} scale={0.01} />
+  </group>
       </mesh>
     )
   }

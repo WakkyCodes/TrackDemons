@@ -11,7 +11,7 @@ export default function FollowCam({ target, enabled }: FollowCameraProps) {
   const { camera } = useThree()
 
   // Base boom offset: up and behind the car in its local space
-  const baseOffset = useMemo(() => new Vector3(0, 4, -8), [])
+  const baseOffset = useMemo(() => new Vector3(0, 2, -5), [])
   const tmpPos = useRef(new Vector3())
   const tmpLook = useRef(new Vector3())
   const worldPos = useRef(new Vector3())
