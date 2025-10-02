@@ -70,7 +70,7 @@ This project is built with a modern, high-performance tech stack:
 Here are some of the features planned for the future:
 
 -   [x] Basic car physics and keyboard controls
--   [ ] Stunt ramps, loops, and dynamic obstacles
+-   [x] Stunt ramps, loops, and dynamic obstacles
 -   [ ] UI for speedometer and race info
 -   [ ] Multiple camera modes (First-person, Cinematic)
 -   [ ] Sound effects for engine, collisions, and environment

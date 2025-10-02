@@ -1,7 +1,8 @@
+// App.tsx
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Mesh } from 'three'
 
 import Car from './components/Car'
@@ -14,14 +15,19 @@ import ReflectiveGround from './components/ReflectiveGround'
 import HUDOverlay from './components/HUDOverlay'
 import FirstPersonHUD from './components/FirstPersonHUD'
 import CarSound from './components/CarSound'
+import useKeyboard from './hooks/useKeyboard'
 
 export default function App() {
   const carRef = useRef<Mesh>(null)
-  const [isFirstPerson, setIsFirstPerson] = useState(false)
+    const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [currentLevel, setCurrentLevel] = useState(1)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
-  //const [showSoundPrompt, setShowSoundPrompt] = useState(true)
-
+   const keys = useKeyboard()
+  useEffect(() => {
+    if (keys.c) {
+      setIsFirstPerson(prev => !prev)
+    }
+  }, [keys.c])
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       <Canvas
@@ -48,7 +54,7 @@ export default function App() {
           <CarSound 
             speed={hudData.speed} 
             gear={hudData.gear} 
-           // onInteractionStatusChange={(interacted) => setShowSoundPrompt(!interacted)} 
+         
           />
         </Physics>
 
@@ -113,31 +119,6 @@ export default function App() {
         </button>
       </div>
 
-      <div
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          zIndex: 1000,
-        }}
-      >
-        <button
-          onClick={() => setIsFirstPerson(!isFirstPerson)}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: isFirstPerson ? '#4CAF50' : '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }}
-        >
-          {isFirstPerson ? '1st Person' : '3rd Person'}
-        </button>
-      </div>
     </div>
   )
 }
