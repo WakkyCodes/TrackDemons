@@ -20,7 +20,7 @@ export default function App() {
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [currentLevel, setCurrentLevel] = useState(1)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
-  const [setShowSoundPrompt] = useState(true)
+  //const [showSoundPrompt, setShowSoundPrompt] = useState(true)
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -48,7 +48,7 @@ export default function App() {
           <CarSound 
             speed={hudData.speed} 
             gear={hudData.gear} 
-            onInteractionStatusChange={(interacted) => setShowSoundPrompt(!interacted)} 
+           // onInteractionStatusChange={(interacted) => setShowSoundPrompt(!interacted)} 
           />
         </Physics>
 
@@ -68,6 +68,7 @@ export default function App() {
       <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
     )}
       {/* UI Controls */}
+      
       <div
         style={{
           position: 'absolute',

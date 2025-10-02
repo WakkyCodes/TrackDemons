@@ -3,20 +3,17 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 interface CarSoundProps {
   speed: number
   gear: string
-  onInteractionStatusChange: (interacted: boolean) => void 
+  //onInteractionStatusChange: (interacted: boolean) => void 
 }
 
 // Define the single sound file to use
 const SINGLE_ENGINE_SOUND_FILE = '/TrackDemons/sounds/engine_1.ogg'; 
 
-const CarSound: React.FC<CarSoundProps> = ({ speed, gear, onInteractionStatusChange }) => {
+const CarSound: React.FC<CarSoundProps> = ({ speed, gear/*, onInteractionStatusChange*/ }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [hasInteracted, setHasInteracted] = useState(false)
 
-  // Report interaction status on change
-  useEffect(() => {
-    onInteractionStatusChange(hasInteracted)
-  }, [hasInteracted, onInteractionStatusChange])
+
 
   // 1. Initial Audio Setup and Cleanup (Runs once)
   useEffect(() => {
