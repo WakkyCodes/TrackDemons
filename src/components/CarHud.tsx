@@ -12,7 +12,7 @@ export const CarHUD: React.FC<CarHUDProps> = ({ carApi, onUpdate }) => {
 
   useFrame(() => {
     if (carApi && carApi.velocity) {
-      const [vx, vy, vz] = carApi.velocity
+      const [vx,/*vy*/, vz] = carApi.velocity
       const speedMs = Math.sqrt(vx * vx + vz * vz)
       const speedKmh = Math.abs(speedMs * 3.6)
       speedRef.current = speedKmh

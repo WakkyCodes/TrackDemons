@@ -63,10 +63,10 @@ export default function AnalogSpeedometer({ speed, gear }: { speed: number; gear
             { value: 160, angle: 72 },
             { value: 180, angle: 96 }
           ].map(({ value, angle }) => {
-            const rad = (angle * Math.PI) / 180;
+            //const rad = (angle * Math.PI) / 180;
             const distance = 70; // Distance from center
-            const x = 50 + distance * Math.cos(rad);
-            const y = 50 + distance * Math.sin(rad);
+            //const x = 50 + distance * Math.cos(rad);
+            //const y = 50 + distance * Math.sin(rad);
             
             return (
               <div key={value}>

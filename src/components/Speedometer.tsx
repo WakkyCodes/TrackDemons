@@ -17,7 +17,7 @@ const Speedometer = ({ carApi, position = [0, 2, 0], visible = true }: Speedomet
   useFrame(() => {
     if (carApi && carApi.velocity) {
       // Get velocity magnitude (speed in m/s) and convert to km/h
-      const [vx, vy, vz] = carApi.velocity
+      const [vx, /*vy*/, vz] = carApi.velocity
       const speedMs = Math.sqrt(vx * vx + vz * vz) // Ignore vertical velocity
       const speedKmh = Math.abs(speedMs * 3.6) // Convert to km/h
       speedRef.current = speedKmh

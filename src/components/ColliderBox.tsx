@@ -1,5 +1,5 @@
 import { useBox } from '@react-three/cannon';
-import { Vector3 } from 'three';
+//import { Vector3 } from 'three';
 
 type ColliderBoxProps = {
   position: [number, number, number];
