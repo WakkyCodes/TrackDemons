@@ -11,8 +11,8 @@ export default function FirstPersonCam({ target, enabled }: FirstPersonCamProps)
   const { camera } = useThree()
 
   // Offset relative to the car’s local space: a bit above and forward
-  const localOffset = useMemo(() => new Vector3(0, 1.0, 0.25), [])
-  const forwardDir = useMemo(() => new Vector3(0, 0, -1), [])
+  const localOffset = useMemo(() => new Vector3(0, 1.0, 0), [])
+  const forwardDir = useMemo(() => new Vector3(0, 0, 1), [])
 
   const worldPos = useRef(new Vector3())
   const worldQuat = useRef(new Quaternion())

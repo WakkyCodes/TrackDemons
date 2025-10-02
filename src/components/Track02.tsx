@@ -4,7 +4,7 @@ import ColliderBox from './ColliderBox';
 
 export default function Track02() {
   // 1. Load your single, complete map file
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track02.glb`);
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`);
 
   return (
     <>
