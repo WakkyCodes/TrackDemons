@@ -1,37 +1,54 @@
-import { Canvas } from "@react-three/fiber";
-import { Environment, OrbitControls } from "@react-three/drei";
-import { Physics } from "@react-three/cannon";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 import { useRef, Suspense } from "react";
-import { Mesh } from "three";
-
-import Car from "./Car";
-import MapMenu from "./MapMenu";
-import Lights from "./Lights";
+import { Mesh, Vector3 } from "three";
 
 type Menu3DProps = {
   onSelectTrack: (track: number) => void;
 };
+const defaultPos = new Vector3(0, 0.5, 0);
+
+
+// Spinning Menu Car component
+function MenuCar({ position = defaultPos }: { position?: Vector3 | [number, number, number] }) {
+  const carRef = useRef<Mesh>(null);
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`);
+
+  useFrame((_, delta) => {
+    if (carRef.current) {
+      carRef.current.rotation.y += delta * 0.5; // spins slowly
+    }
+  });
+
+  return (
+    <mesh ref={carRef} position={position} castShadow>
+      <primitive object={scene} scale={0.01} />
+    </mesh>
+  );
+}
 
 export default function Menu3D({ onSelectTrack }: Menu3DProps) {
-  const carRef = useRef<Mesh>(null);
-
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas shadows camera={{ position: [5, 3, 5], fov: 50 }}>
-        <Lights />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
 
-        <Physics gravity={[0, -9.82, 0]}>
-          {/* Static map environment */}
-          <Suspense fallback={null}>
-            <MapMenu />
-         </Suspense>
+        <Suspense fallback={null}>
+          {/* Empty fallback plane */}
+          <mesh rotation-x={-Math.PI / 2} receiveShadow>
+            <planeGeometry args={[100, 100]} />
+            <meshStandardMaterial color="lightgray" />
+          </mesh>
 
-          {/* Static car in menu */}
-          <Car ref={carRef} startPosition={[0, 2, 0]} />
-        </Physics>
+          {/* Spinning showroom car */}
+          <MenuCar position={[0, 1, 0]} />
 
-        <OrbitControls enablePan={false} enableZoom={false} />
-        <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
+          {/* Environment HDRI */}
+          <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
+        </Suspense>
+
+        <OrbitControls enablePan={false} enableZoom={true} enableRotate={true} />
       </Canvas>
 
       {/* UI Overlay */}
