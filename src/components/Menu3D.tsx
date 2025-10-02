@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Physics } from "@react-three/cannon";
-import { useRef } from "react";
+import { useRef, Suspense } from "react";
 import { Mesh } from "three";
 
 import Car from "./Car";
@@ -22,7 +22,9 @@ export default function Menu3D({ onSelectTrack }: Menu3DProps) {
 
         <Physics gravity={[0, -9.82, 0]}>
           {/* Static map environment */}
-          <MapMenu />
+          <Suspense fallback={null}>
+            <MapMenu />
+         </Suspense>
 
           {/* Static car in menu */}
           <Car ref={carRef} startPosition={[0, 2, 0]} />
