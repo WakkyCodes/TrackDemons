@@ -13,12 +13,14 @@ import CameraController from './components/CameraController'
 import ReflectiveGround from './components/ReflectiveGround'
 import HUDOverlay from './components/HUDOverlay'
 import FirstPersonHUD from './components/FirstPersonHUD'
+import CarSound from './components/CarSound'
 
 export default function App() {
   const carRef = useRef<Mesh>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [currentLevel, setCurrentLevel] = useState(1)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
+  const [showSoundPrompt, setShowSoundPrompt] = useState(true)
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -41,13 +43,23 @@ export default function App() {
             startPosition={currentLevel === 1 ? [9, 2.5, -7] : [0, 2.5, 0]} 
             onHudUpdate={setHudData}
           />
+
+          {/* Update CarSound to use the new prop */}
+          <CarSound 
+            speed={hudData.speed} 
+            gear={hudData.gear} 
+            onInteractionStatusChange={(interacted) => setShowSoundPrompt(!interacted)} 
+          />
         </Physics>
+
+        
 
         {/* Camera logic */}
         <CameraController target={carRef} isFirstPerson={isFirstPerson} />
 
         <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
       </Canvas>
+
 
       {/* Conditional HUD Rendering */}
      {isFirstPerson ? (
