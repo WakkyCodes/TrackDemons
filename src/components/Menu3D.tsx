@@ -42,7 +42,7 @@ export default function Menu3D({ onSelectTrack }: Menu3DProps) {
           </mesh>
 
           {/* Spinning showroom car */}
-          <MenuCar position={[0, 1, 0]} />
+          <MenuCar position={[0, 0.5, 0]} />
 
           {/* Environment HDRI */}
           <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
