@@ -20,7 +20,7 @@ export default function App() {
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [currentLevel, setCurrentLevel] = useState(1)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
-  const [showSoundPrompt, setShowSoundPrompt] = useState(true)
+  const [setShowSoundPrompt] = useState(true)
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
