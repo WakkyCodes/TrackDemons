@@ -7,7 +7,7 @@ interface CarSoundProps {
 }
 
 // Define the single sound file to use
-const SINGLE_ENGINE_SOUND_FILE = '/TrackDemons/sounds/engine_1.ogg'; 
+const SINGLE_ENGINE_SOUND_FILE = '/TrackDemons/sounds/engine_2.mp3'; 
 
 const CarSound: React.FC<CarSoundProps> = ({ speed, gear/*, onInteractionStatusChange*/ }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -20,7 +20,7 @@ const CarSound: React.FC<CarSoundProps> = ({ speed, gear/*, onInteractionStatusC
     // Create the Audio element once using the single file
     const audio = new Audio(SINGLE_ENGINE_SOUND_FILE)
     audio.loop = true
-    audio.volume = 0 // Start muted
+    audio.volume = 0.3 // Start muted
     audio.playbackRate = 0.5 // Start with a low rev sound
     audioRef.current = audio
     
