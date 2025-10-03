@@ -14,6 +14,7 @@ import ReflectiveGround from './ReflectiveGround'
 import HUDOverlay from './HUDOverlay'
 import FirstPersonHUD from './FirstPersonHUD'
 import ControlsPopup from './ControlsPopup'
+import Countdown from './Countdown'
 import CarSound from './CarSound'
 import useKeyboard from '../hooks/useKeyboard'
 
@@ -27,32 +28,88 @@ export default function Game({ track, onBackToMenu }: GameProps) {
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
   const [currentLevel, setCurrentLevel] = useState(track)
+  const [gameStarted, setGameStarted] = useState(false)
+  const [showControls, setShowControls] = useState(true)
+  const [showCountdown, setShowCountdown] = useState(false)
+  const [key, setKey] = useState(0)
+  const [checkpoints, setCheckpoints] = useState<number[]>([])
+  const [currentCheckpoint, setCurrentCheckpoint] = useState(0)
 
   const keys = useKeyboard()
 
   // Toggle first-person camera using 'C' key
   useEffect(() => {
-    if (keys.c) {
+    if (keys.c && gameStarted) {
       setIsFirstPerson((prev) => !prev)
     }
-  }, [keys.c])
+  }, [keys.c, gameStarted])
+
+  // Handle controls popup close
+  const handleControlsClose = () => {
+    setShowControls(false)
+    setShowCountdown(true)
+  }
+
+  // Handle countdown completion
+  const handleCountdownComplete = () => {
+    setShowCountdown(false)
+    setGameStarted(true)
+  }
+
+  // Handle checkpoint events
+  const handleCheckpoint = (checkpointNumber: number) => {
+    if (!checkpoints.includes(checkpointNumber)) {
+      setCheckpoints(prev => [...prev, checkpointNumber])
+      setCurrentCheckpoint(checkpointNumber)
+      
+      // Optional: Add sound effect or visual feedback
+      console.log(`Checkpoint ${checkpointNumber} reached!`)
+    }
+  }
+
+  // Reset game state when track changes
+  const handleTrackChange = (newTrack: number) => {
+    if (!gameStarted) return
+    
+    setCurrentLevel(newTrack)
+    setGameStarted(false)
+    setShowCountdown(false)
+    setShowControls(false)
+    setCheckpoints([])
+    setCurrentCheckpoint(0)
+    
+    // Force re-render of physics and car by changing key
+    setKey(prev => prev + 1)
+    
+    // Start countdown automatically after track change
+    setTimeout(() => {
+      setShowCountdown(true)
+    }, 500)
+  }
+
+  // Initialize with the prop track
+  useEffect(() => {
+    setCurrentLevel(track)
+  }, [track])
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <Canvas shadows camera={{ position: [3, 3, 3] }}>
+      <Canvas shadows camera={{ position: [3, 3, 3] }} key={key}>
         <Lights />
 
-        <Physics gravity={[0, -9.82, 0]}>
+        <Physics gravity={[0, -9.82, 0]} key={`physics-${key}`}>
           <ReflectiveGround />
           <FollowCam target={carRef} enabled={!isFirstPerson} />
 
-          {currentLevel === 1 && <Track01 />}
-          {currentLevel === 2 && <Track02 />}
+          {currentLevel === 1 && <Track01 key="track01" onCheckpoint={handleCheckpoint} />}
+          {currentLevel === 2 && <Track02 key="track02" />}
 
           <Car
+            key={`car-${key}`}
             ref={carRef}
             startPosition={currentLevel === 1 ? [9, 2.5, -7] : [0, 2.5, 0]}
             onHudUpdate={setHudData}
+            disabled={!gameStarted}
           />
 
           <CarSound speed={hudData.speed} gear={hudData.gear} />
@@ -62,13 +119,30 @@ export default function Game({ track, onBackToMenu }: GameProps) {
         <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
       </Canvas>
 
-      <ControlsPopup />
+      {/* Overlay sequence: Controls -> Countdown -> Game */}
+      {showControls && <ControlsPopup onClose={handleControlsClose} />}
+      
+      {showCountdown && (
+        <Countdown onComplete={handleCountdownComplete} />
+      )}
 
       {/* HUD */}
       {isFirstPerson ? (
-        <FirstPersonHUD speed={hudData.speed} gear={hudData.gear} />
+        <FirstPersonHUD 
+          speed={hudData.speed} 
+          gear={hudData.gear} 
+          gameStarted={gameStarted}
+          currentCheckpoint={currentCheckpoint}
+          checkpoints={checkpoints}
+        />
       ) : (
-        <HUDOverlay speed={hudData.speed} gear={hudData.gear} />
+        <HUDOverlay 
+          speed={hudData.speed} 
+          gear={hudData.gear} 
+          gameStarted={gameStarted}
+          currentCheckpoint={currentCheckpoint}
+          checkpoints={checkpoints}
+        />
       )}
 
       {/* Top-left UI */}
@@ -83,7 +157,7 @@ export default function Game({ track, onBackToMenu }: GameProps) {
         }}
       >
         <button
-          onClick={() => setCurrentLevel(1)}
+          onClick={() => handleTrackChange(1)}
           style={{
             padding: '10px 20px',
             backgroundColor: currentLevel === 1 ? '#4CAF50' : '#666',
@@ -94,12 +168,13 @@ export default function Game({ track, onBackToMenu }: GameProps) {
             fontSize: '16px',
             fontWeight: 'bold',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            opacity: gameStarted ? 1 : 0.7,
           }}
         >
           Track 1
         </button>
         <button
-          onClick={() => setCurrentLevel(2)}
+          onClick={() => handleTrackChange(2)}
           style={{
             padding: '10px 20px',
             backgroundColor: currentLevel === 2 ? '#4CAF50' : '#666',
@@ -110,6 +185,7 @@ export default function Game({ track, onBackToMenu }: GameProps) {
             fontSize: '16px',
             fontWeight: 'bold',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            opacity: gameStarted ? 1 : 0.7,
           }}
         >
           Track 2
@@ -127,9 +203,43 @@ export default function Game({ track, onBackToMenu }: GameProps) {
           gap: '10px',
         }}
       >
-        <button onClick={onBackToMenu}>Back to Menu</button>
-        
+        <button 
+          onClick={onBackToMenu}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#f44336',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+        >
+          Back to Menu
+        </button>
       </div>
+
+      {/* Game start message */}
+      {!gameStarted && !showControls && !showCountdown && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            fontSize: '32px',
+            fontWeight: 'bold',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+            zIndex: 1000,
+            textAlign: 'center',
+          }}
+        >
+          Get Ready!
+        </div>
+      )}
     </div>
   )
 }
