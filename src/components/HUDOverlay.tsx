@@ -1,5 +1,18 @@
-// HUDOverlay.tsx
-export default function HUDOverlay({ speed, gear }: { speed: number; gear: string }) {
+interface HUDOverlayProps {
+  speed: number;
+  gear: string;
+  gameStarted?: boolean;
+  currentCheckpoint?: number;
+  checkpoints?: number[];
+}
+
+export default function HUDOverlay({ 
+  speed, 
+  gear, 
+  gameStarted = true,
+  currentCheckpoint = 0,
+  checkpoints = [] 
+}: HUDOverlayProps) {
   return (
     <div
       style={{
@@ -32,7 +45,18 @@ export default function HUDOverlay({ speed, gear }: { speed: number; gear: strin
         marginTop: '8px',
         fontWeight: 'bold'
       }}>
-         {gear}
+        {gear}
+      </div>
+      
+      {/* Checkpoint Progress */}
+      <div style={{ 
+        fontSize: '14px', 
+        color: '#ffffff', 
+        marginTop: '12px',
+        borderTop: '1px solid #00ff88',
+        paddingTop: '8px'
+      }}>
+        Checkpoint: {currentCheckpoint}/3
       </div>
     </div>
   )

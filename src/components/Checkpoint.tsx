@@ -1,6 +1,6 @@
 // SimpleCheckpoint.tsx
 import { useBox } from '@react-three/cannon';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Mesh } from 'three';
 
 interface CheckpointProps {
