@@ -34,6 +34,7 @@ export default function Game({ track, onBackToMenu }: GameProps) {
   const [key, setKey] = useState(0)
   const [checkpoints, setCheckpoints] = useState<number[]>([])
   const [currentCheckpoint, setCurrentCheckpoint] = useState(0)
+  const [track1Checkpoints, setTrack1Checkpoints] = useState<number[]>([])
 
   const keys = useKeyboard()
 
@@ -59,10 +60,15 @@ export default function Game({ track, onBackToMenu }: GameProps) {
   // Handle checkpoint events
   const handleCheckpoint = (checkpointNumber: number) => {
     if (!checkpoints.includes(checkpointNumber)) {
-      setCheckpoints(prev => [...prev, checkpointNumber])
+      const newCheckpoints = [...checkpoints, checkpointNumber]
+      setCheckpoints(newCheckpoints)
       setCurrentCheckpoint(checkpointNumber)
       
-      // Optional: Add sound effect or visual feedback
+      // Store track-specific checkpoints
+      if (currentLevel === 1) {
+        setTrack1Checkpoints(newCheckpoints)
+      }
+      
       console.log(`Checkpoint ${checkpointNumber} reached!`)
     }
   }
@@ -75,6 +81,8 @@ export default function Game({ track, onBackToMenu }: GameProps) {
     setGameStarted(false)
     setShowCountdown(false)
     setShowControls(false)
+    
+    // Reset current checkpoint state but preserve track-specific states
     setCheckpoints([])
     setCurrentCheckpoint(0)
     
@@ -86,6 +94,14 @@ export default function Game({ track, onBackToMenu }: GameProps) {
       setShowCountdown(true)
     }, 500)
   }
+
+  // Restore track-specific checkpoints when switching back to track 1
+  useEffect(() => {
+    if (currentLevel === 1 && track1Checkpoints.length > 0) {
+      setCheckpoints(track1Checkpoints)
+      setCurrentCheckpoint(Math.max(...track1Checkpoints))
+    }
+  }, [currentLevel, track1Checkpoints])
 
   // Initialize with the prop track
   useEffect(() => {
@@ -101,7 +117,13 @@ export default function Game({ track, onBackToMenu }: GameProps) {
           <ReflectiveGround />
           <FollowCam target={carRef} enabled={!isFirstPerson} />
 
-          {currentLevel === 1 && <Track01 key="track01" onCheckpoint={handleCheckpoint} />}
+          {currentLevel === 1 && (
+            <Track01 
+              key="track01" 
+              onCheckpoint={handleCheckpoint}
+              
+            />
+          )}
           {currentLevel === 2 && <Track02 key="track02" />}
 
           <Car
@@ -131,17 +153,13 @@ export default function Game({ track, onBackToMenu }: GameProps) {
         <FirstPersonHUD 
           speed={hudData.speed} 
           gear={hudData.gear} 
-          gameStarted={gameStarted}
           currentCheckpoint={currentCheckpoint}
-          checkpoints={checkpoints}
         />
       ) : (
         <HUDOverlay 
           speed={hudData.speed} 
           gear={hudData.gear} 
-          gameStarted={gameStarted}
           currentCheckpoint={currentCheckpoint}
-          checkpoints={checkpoints}
         />
       )}
 

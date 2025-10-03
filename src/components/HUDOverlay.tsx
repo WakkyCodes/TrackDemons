@@ -1,17 +1,13 @@
 interface HUDOverlayProps {
   speed: number;
   gear: string;
-  gameStarted?: boolean;
   currentCheckpoint?: number;
-  checkpoints?: number[];
 }
 
 export default function HUDOverlay({ 
   speed, 
   gear, 
-  gameStarted = true,
-  currentCheckpoint = 0,
-  checkpoints = [] 
+  currentCheckpoint = 0
 }: HUDOverlayProps) {
   return (
     <div

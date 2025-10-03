@@ -4,17 +4,13 @@ import AnalogSpeedometer from './AnalogSpeedometer';
 interface FirstPersonHUDProps {
   speed: number;
   gear: string;
-  gameStarted?: boolean;
   currentCheckpoint?: number;
-  checkpoints?: number[];
 }
 
 export default function FirstPersonHUD({ 
   speed, 
   gear, 
-  gameStarted = true,
-  currentCheckpoint = 0,
-  checkpoints = [] 
+  currentCheckpoint = 0
 }: FirstPersonHUDProps) {
 
   return (
