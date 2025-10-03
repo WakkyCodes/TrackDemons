@@ -14,10 +14,11 @@ import { useGLTF } from '@react-three/drei'
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
   startPosition?: [number, number, number]
+  disabled?: boolean // Add disabled prop
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7] }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 400,
       position: startPosition,
@@ -55,6 +56,22 @@ const Car = forwardRef<Mesh, CarProps>(
 
     useFrame((_, delta) => {
       if (!physicsRef.current) return
+
+      // Stop all car movement when disabled
+      if (disabled) {
+        api.velocity.set(0, velocity.current[1], 0)
+        api.angularVelocity.set(0, 0, 0)
+        currentSpeed.current = 0
+        targetSpeed.current = 0
+        
+        // Update HUD to show 0 speed when disabled
+        if (speed !== 0 || gear !== 'N') {
+          setSpeed(0)
+          setGear('N')
+          onHudUpdate?.({ speed: 0, gear: 'N' })
+        }
+        return
+      }
 
       const maxSpeed = 50
       const acceleration = 7
@@ -136,9 +153,9 @@ const Car = forwardRef<Mesh, CarProps>(
 
     return (
       <mesh ref={physicsRef} castShadow>
-       <group position={[-3.5, 0, 0]}>
-    <primitive object={scene} scale={0.01} />
-  </group>
+        <group position={[-3.5, 0, 0]}>
+          <primitive object={scene} scale={0.01} />
+        </group>
       </mesh>
     )
   }
