@@ -56,10 +56,10 @@ const Car = forwardRef<Mesh, CarProps>(
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      const maxSpeed = 40
-      const acceleration = 7
+      const maxSpeed = 10
+      const acceleration = 5
       const deceleration = 3
-      const turnSpeed = 8
+      const turnSpeed = 6
 
       // Speed control
       if (keys.forward) {

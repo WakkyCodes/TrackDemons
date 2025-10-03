@@ -9,9 +9,10 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-You need to have **Node.js** (version 18.x or later) and **npm** installed on your system.
+You need to have **Node.js** (version 18.x or later), **npm**, and **Git LFS** installed on your system.
 
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/)  
+- [Git LFS](https://git-lfs.com/)
 
 ### Installation & Setup
 
@@ -19,21 +20,28 @@ Follow these simple steps to get the development environment running:
 
 1.  **Clone the repository**
     ```sh
-    git clone [https://github.com/wakkycodes/TrackDemons.git]
+    git clone https://github.com/wakkycodes/TrackDemons.git
     ```
 
-2.  **Navigate to the project directory**
+2.  **Retrieve LFS objects (models, textures, etc.)**
+    ```sh
+    git lfs install
+    git lfs pull
+    ```
+    > Without this step, you may see placeholder text files instead of the actual game assets.
+
+3.  **Navigate to the project directory**
     ```sh
     cd trackdemons
     ```
 
-3.  **Install dependencies**
+4.  **Install dependencies**
     ```sh
     npm install
     ```
     > **Note on `npm ci`**: While you mentioned `npm ci`, it's best to use `npm install` for local development. `npm ci` is mainly for automated environments (like GitHub Actions) to ensure a clean, exact install from the `package-lock.json` file.
 
-4.  **Run the development server**
+5.  **Run the development server**
     ```sh
     npm run dev
     ```
@@ -70,8 +78,8 @@ This project is built with a modern, high-performance tech stack:
 Here are some of the features planned for the future:
 
 -   [x] Basic car physics and keyboard controls
--   [x] Stunt ramps, loops, and dynamic obstacles
--   [ ] UI for speedometer and race info
+-   [ ] Stunt ramps, loops, and dynamic obstacles
+-   [x] UI for speedometer and race info
 -   [ ] Multiple camera modes (First-person, Cinematic)
 -   [ ] Sound effects for engine, collisions, and environment
 -   [ ] Selection of different car models with unique stats
@@ -79,4 +87,3 @@ Here are some of the features planned for the future:
 ---
 
 ## 📄 License
-

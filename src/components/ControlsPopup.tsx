@@ -1,6 +1,11 @@
+// ControlsPopup.tsx
 import { useEffect, useState } from "react";
 
-export default function ControlsPopup() {
+interface ControlsPopupProps {
+  onClose?: () => void; // Add this
+}
+
+export default function ControlsPopup({ onClose }: ControlsPopupProps) {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
@@ -10,7 +15,11 @@ export default function ControlsPopup() {
       localStorage.setItem("seenControls", "true");
     }
   }, []);
-  console.log("ControlsPopup rendering", show);
+
+  const handleClose = () => {
+    setShow(false);
+    onClose?.(); // Call the onClose callback
+  };
 
   if (!show) return null;
 
@@ -41,7 +50,7 @@ export default function ControlsPopup() {
         <li>Space – Handbrake</li>
       </ul>
       <button
-        onClick={() => setShow(false)}
+        onClick={handleClose} // Use handleClose instead of setShow
         style={{
           marginTop: "20px",
           padding: "10px 20px",
