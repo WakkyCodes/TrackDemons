@@ -19,13 +19,13 @@ interface CarProps {
 const Car = forwardRef<Mesh, CarProps>(
   ({ onHudUpdate, startPosition = [9, 9, -7] }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
-      mass: 400,
+      mass: 1000,
       position: startPosition,
       args: [0, 0.5, 2],
-      linearDamping: 0.4,
+      linearDamping: 0.3,
       angularDamping: 0.4,
       material: {
-        friction: 0.5,
+        friction: 0.8,
         restitution: 0.1,
       },
       angularFactor: [0, 1, 0],
@@ -56,7 +56,7 @@ const Car = forwardRef<Mesh, CarProps>(
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      const maxSpeed = 20
+      const maxSpeed = 40
       const acceleration = 7
       const deceleration = 3
       const turnSpeed = 8
@@ -132,12 +132,12 @@ const Car = forwardRef<Mesh, CarProps>(
       }
     })
 
-    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/bmw_m3.glb`)
 
     return (
       <mesh ref={physicsRef} castShadow>
-       <group position={[-3.5, 0, 0]}>
-    <primitive object={scene} scale={0.01} />
+       <group position={[0.7, 0, 0]}>
+    <primitive object={scene} scale={0.5} />
   </group>
       </mesh>
     )

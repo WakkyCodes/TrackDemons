@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Mesh } from 'three'
 
 import Car from './Car'
+import BMW from './BMW'
 import Track01 from './Track01'
 import Track02 from './Track02'
 import Lights from './Lights'
@@ -21,16 +22,26 @@ type GameProps = {
   track: number
   onBackToMenu: () => void
 }
+const carComponents = {
+  1: BMW,    // Track 1 uses Car
+  2: Car,   // Track 2 uses Car2
+}
 
 export default function Game({ track, onBackToMenu }: GameProps) {
   const carRef = useRef<Mesh>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
   const [currentLevel, setCurrentLevel] = useState(track)
-
   const keys = useKeyboard()
+const CurrentCar = carComponents[currentLevel as keyof typeof carComponents]
 
-  // Toggle first-person camera using 'C' key
+  // Reset car ref when switching tracks
+  useEffect(() => {
+    // Force a re-render when track changes to ensure proper ref handling
+    if (carRef.current) {
+      // You might want to reset any car-specific state here if needed
+    }
+  }, [currentLevel])
   useEffect(() => {
     if (keys.c) {
       setIsFirstPerson((prev) => !prev)
@@ -49,11 +60,12 @@ export default function Game({ track, onBackToMenu }: GameProps) {
           {currentLevel === 1 && <Track01 />}
           {currentLevel === 2 && <Track02 />}
 
-          <Car
-            ref={carRef}
-            startPosition={currentLevel === 1 ? [9, 2.5, -7] : [0, 2.5, 0]}
-            onHudUpdate={setHudData}
-          />
+        
+            <CurrentCar
+              ref={carRef}
+              startPosition={currentLevel === 1 ? [9, 2.5, -7] : [0, 2.5, 0]}
+              onHudUpdate={setHudData}
+            />
 
           <CarSound speed={hudData.speed} gear={hudData.gear} />
         </Physics>
