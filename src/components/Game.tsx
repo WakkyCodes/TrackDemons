@@ -19,16 +19,19 @@ import Countdown from './Countdown'
 import CarSound from './CarSound'
 import useKeyboard from '../hooks/useKeyboard'
 
+type CarModel = 'car' | 'bmw'  
+
 type GameProps = {
   track: number
+  selectedCar: CarModel 
   onBackToMenu: () => void
 }
 const carComponents = {
-  1: BMW,    // Track 1 uses Car
-  2: Car,   // Track 2 uses Car2
+  car: Car,
+  bmw: BMW,
 }
 
-export default function Game({ track, onBackToMenu }: GameProps) {
+export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
   const carRef = useRef<Mesh>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
@@ -42,7 +45,7 @@ export default function Game({ track, onBackToMenu }: GameProps) {
   const [track1Checkpoints, setTrack1Checkpoints] = useState<number[]>([])
 
   const keys = useKeyboard()
-const CurrentCar = carComponents[currentLevel as keyof typeof carComponents]
+const CurrentCar = carComponents[selectedCar]
 
   // Reset car ref when switching tracks
   useEffect(() => {

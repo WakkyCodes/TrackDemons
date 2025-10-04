@@ -1,57 +1,141 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 import { useRef, Suspense } from "react";
-import { Mesh, Vector3 } from "three";
+import { Mesh } from "three";
+
+type CarModel = 'car' | 'bmw';
 
 type Menu3DProps = {
   onSelectTrack: (track: number) => void;
+  selectedCar: CarModel;
+  onCarChange: (car: CarModel) => void;
 };
-const defaultPos = new Vector3(0, 0.5, 0);
 
+const CAR_CONFIGS = {
+  car: {
+    path: `${import.meta.env.BASE_URL}models/car.glb`,
+    scale: 0.01,
+    position: [0, 0.5, 0] as [number, number, number],
+    name: "Default Car"
+  },
+  bmw: {
+    path: `${import.meta.env.BASE_URL}models/bmw_m3.glb`,
+    scale: 0.5,
+    position: [0, 0.5, 0] as [number, number, number],
+    name: "BMW M3"
+  }
+};
 
-// Spinning Menu Car component
-function MenuCar({ position = defaultPos }: { position?: Vector3 | [number, number, number] }) {
+function MenuCar({ carModel }: { carModel: CarModel }) {
   const carRef = useRef<Mesh>(null);
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`);
+  const config = CAR_CONFIGS[carModel];
+  const { scene } = useGLTF(config.path);
 
   useFrame((_, delta) => {
     if (carRef.current) {
-      carRef.current.rotation.y += delta * 0.5; // spins slowly
+      carRef.current.rotation.y += delta * 0.5;
     }
   });
 
   return (
-    <mesh ref={carRef} position={position} castShadow>
-      <primitive object={scene} scale={0.01} />
+    <mesh ref={carRef} position={config.position} castShadow>
+      <primitive object={scene.clone()} scale={config.scale} />
     </mesh>
   );
 }
 
-export default function Menu3D({ onSelectTrack }: Menu3DProps) {
+// Map Menu Scene Component
+function MapMenuScene() {
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/mapmenu.glb`);
+  
+  return <primitive object={scene} />;
+}
+
+export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu3DProps) {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      <Canvas shadows camera={{ position: [5, 3, 5], fov: 50 }}>
+      <Canvas shadows camera={{ position: [-1, 2, -3], fov: 80 }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
 
         <Suspense fallback={null}>
-          {/* Empty fallback plane */}
-          <mesh rotation-x={-Math.PI / 2} receiveShadow>
-            <planeGeometry args={[100, 100]} />
-            <meshStandardMaterial color="lightgray" />
-          </mesh>
+          {/* Map Menu Background */}
+          <MapMenuScene />
 
-          {/* Spinning showroom car */}
-          <MenuCar position={[0, 0.5, 0]} />
+          <MenuCar carModel={selectedCar} />
 
-          {/* Environment HDRI */}
           <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
         </Suspense>
 
         <OrbitControls enablePan={false} enableZoom={true} enableRotate={true} />
       </Canvas>
 
-      {/* UI Overlay */}
+      {/* Car Selection UI */}
+      <div
+        style={{
+          position: "absolute",
+          top: "40px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "15px",
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          padding: "15px 25px",
+          borderRadius: "10px",
+        }}
+      >
+        <button
+          onClick={() => onCarChange('car')}
+          style={{
+            padding: "10px 20px",
+            fontSize: "16px",
+            backgroundColor: selectedCar === 'car' ? "#4CAF50" : "#555",
+            color: "white",
+            border: selectedCar === 'car' ? "2px solid #4CAF50" : "2px solid transparent",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "all 0.3s",
+          }}
+        >
+          {CAR_CONFIGS.car.name}
+        </button>
+        <button
+          onClick={() => onCarChange('bmw')}
+          style={{
+            padding: "10px 20px",
+            fontSize: "16px",
+            backgroundColor: selectedCar === 'bmw' ? "#4CAF50" : "#555",
+            color: "white",
+            border: selectedCar === 'bmw' ? "2px solid #4CAF50" : "2px solid transparent",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "all 0.3s",
+          }}
+        >
+          {CAR_CONFIGS.bmw.name}
+        </button>
+      </div>
+
+      {/* Selected Car Info */}
+      <div
+        style={{
+          position: "absolute",
+          top: "120px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          color: "white",
+          fontSize: "24px",
+          fontWeight: "bold",
+          textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
+          textAlign: "center",
+        }}
+      >
+        {CAR_CONFIGS[selectedCar].name}
+      </div>
+
+      {/* Track Selection */}
       <div
         style={{
           position: "absolute",
