@@ -38,7 +38,7 @@ export default function AnalogSpeedometer({ speed, gear }: { speed: number; gear
         }}>
           {/* Center Hub */}
           <div style={{
-            position: 'absolute',
+            position: 'absolute', 
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
@@ -137,7 +137,7 @@ export default function AnalogSpeedometer({ speed, gear }: { speed: number; gear
           {/* MPH Text */}
           <div style={{
             position: 'absolute',
-            bottom: '25%',
+            bottom: '15%',
             left: '50%',
             transform: 'translateX(-50%)',
             color: '#333',
@@ -146,7 +146,7 @@ export default function AnalogSpeedometer({ speed, gear }: { speed: number; gear
             fontFamily: 'Arial, sans-serif',
             letterSpacing: '1px'
           }}>
-            mph
+            rev
           </div>
 
           {/* Gear Display */}

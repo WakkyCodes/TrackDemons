@@ -18,7 +18,11 @@ export default function Track02() {
     { position: [62, 1, -8.5], scale: [20, 2, 1], rotation: [0, Math.PI / 12, 0] },
 
 
-    { position: [-15, 4, -26], scale: [1, 8, 5] },    // Tower collider
+    { position: [-14, 4, -35], scale: [1, 8, 49] },
+    
+    
+    { position: [-11, 4, -32], scale: [1, 8, 37] },   // Tower collider
+    
     { position: [10, 1, 9], scale: [1, 2, 20] },      // Example wall
     // Add more as needed
   ];

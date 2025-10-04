@@ -41,14 +41,19 @@ export default function FirstPersonHUD({
         {/* Checkpoint Progress for First Person View */}
         <div
           style={{
+            position: 'fixed',
+            bottom: '215px',
+            left: '0px',
             background: 'rgba(0, 0, 0, 0.7)',
             padding: '10px 20px',
             borderRadius: '10px',
             border: '1px solid #00ff88',
-            marginBottom: '10px',
             textAlign: 'center',
             fontSize: '14px',
-            color: '#00ff88'
+            color: '#00ff88',
+            zIndex: 1100,
+            fontFamily: 'Arial, sans-serif',
+            pointerEvents: 'none',
           }}
         >
           Checkpoint: {currentCheckpoint}/3
