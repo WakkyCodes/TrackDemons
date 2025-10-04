@@ -1,23 +1,41 @@
-import { useBox } from '@react-three/cannon';
-//import { Vector3 } from 'three';
+import { useBox } from '@react-three/cannon'
+import { useRef } from 'react'
+import { Mesh } from 'three'
 
 type ColliderBoxProps = {
-  position: [number, number, number];
-  scale?: [number, number, number];
-  rotation?: [number, number, number];
-};
+  position: [number, number, number]
+  scale?: [number, number, number]
+  rotation?: [number, number, number]
+  visible?: boolean // Toggle visibility for debugging
+}
 
-// This component creates an invisible physics box
-// We use it for walls, trees, and other obstacles in the track.
-export default function ColliderBox({ position, scale = [1, 1, 1], rotation = [0, 0, 0] }: ColliderBoxProps) {
+export default function ColliderBox({ 
+  position, 
+  scale = [1, 1, 1], 
+  rotation = [0, 0, 0],
+  visible = true // Set to true to see red boxes
+}: ColliderBoxProps) {
+  const meshRef = useRef<Mesh>(null)
+
+  // Attach physics to the mesh
   useBox(() => ({
     args: scale,
     position,
     rotation,
-    type: 'Static', // It's a static object that doesn't move
-  }));
+    type: 'Static',
+  }), meshRef)
 
-  // This component doesn't render anything visible, it's just a physics body.
-  // You can optionally add a visible <mesh> here for debugging.
-  return null;
+  if (!visible) return null
+
+  return (
+    <mesh ref={meshRef}>
+      <boxGeometry args={scale} />
+      <meshBasicMaterial 
+        color="red" 
+        wireframe 
+        transparent 
+        opacity={0.5}
+      />
+    </mesh>
+  )
 }
