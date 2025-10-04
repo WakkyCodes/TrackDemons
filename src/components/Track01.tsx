@@ -1,8 +1,11 @@
+// src/components/Track01.tsx
 import { useGLTF } from '@react-three/drei';
-import ColliderBox from './ColliderBox';
+import { useMemo } from 'react';
+import * as THREE from 'three';
 import Ramp from './Ramp';
-import { CoveredCar } from './CoveredCar'; 
+import { CoveredCar } from './CoveredCar';
 import Checkpoint from './Checkpoint';
+import ColliderWall from './ColliderWall';
 
 interface Track01Props {
   onCheckpoint?: (checkpointNumber: number) => void;
@@ -11,42 +14,72 @@ interface Track01Props {
 export default function Track01({ onCheckpoint }: Track01Props) {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track01.glb`);
 
+  const bounds = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    return {
+      min: box.min,
+      max: box.max,
+      size: box.getSize(new THREE.Vector3()),
+      center: box.getCenter(new THREE.Vector3()),
+    };
+  }, [scene]);
+
   return (
     <>
-      {/* This renders the visible track model. It has no physics itself. */}
+      {/* Track Model */}
       <primitive object={scene} />
 
-      {/* All the invisible walls (ColliderBoxes) go here */}
-      <ColliderBox position={[-2.8, 0, 9.55]} rotation={[0, Math.PI / 4, 0]} />
-      <ColliderBox position={[-4.15, 0, 11.9]} rotation={[0, Math.PI / 3, 0]} />
-      {/* ... add all the other ColliderBox instances from the example ... */}
+      {/* === Physics Walls Around Track === */}
+      <ColliderWall
+        position={[bounds.center.x, bounds.min.y - 0.5, bounds.center.z]}
+        args={[bounds.size.x, 1, bounds.size.z]}
+        color="red"
+      />
+      <ColliderWall
+        position={[bounds.center.x, bounds.max.y + 0.5, bounds.center.z]}
+        args={[bounds.size.x, 1, bounds.size.z]}
+        color="blue"
+      />
+      <ColliderWall
+        position={[bounds.min.x - 0.5, bounds.center.y, bounds.center.z]}
+        args={[1, bounds.size.y, bounds.size.z]}
+        color="green"
+      />
+      <ColliderWall
+        position={[bounds.max.x + 0.5, bounds.center.y, bounds.center.z]}
+        args={[1, bounds.size.y, bounds.size.z]}
+        color="green"
+      />
+      <ColliderWall
+        position={[bounds.center.x, bounds.center.y, bounds.max.z + 0.5]}
+        args={[bounds.size.x, bounds.size.y, 1]}
+        color="yellow"
+      />
+      <ColliderWall
+        position={[bounds.center.x, bounds.center.y, bounds.min.z - 0.5]}
+        args={[bounds.size.x, bounds.size.y, 1]}
+        color="yellow"
+      />
 
-      {/* This renders the ramp, both visibly and with its own physics */}
+      {/* Extra Track Elements */}
       <Ramp />
-      
-      {/* Covered car */}
       <CoveredCar position={[7.9, 0, -3]} />
 
-      {/* CHECKPOINTS */}
-      {/* Checkpoint 1 - Near the starting area */}
-      <Checkpoint 
-        position={[10.5, 0.5, -4]} 
+      {/* Checkpoints */}
+      <Checkpoint
+        position={[10.5, 0.5, -4]}
         rotation={[0, 0, 0]}
         checkpointNumber={1}
         onCheckpoint={onCheckpoint}
       />
-      
-      {/* Checkpoint 2 - After the first turn */}
-      <Checkpoint 
-        position={[0, 0.5, 14.3]} 
+      <Checkpoint
+        position={[0, 0.5, 14.3]}
         rotation={[0, Math.PI / 1.47, 0]}
         checkpointNumber={2}
         onCheckpoint={onCheckpoint}
       />
-      
-      {/* Checkpoint 3 - Near the finish line */}
-      <Checkpoint 
-        position={[-9, 0.5, -2.8]} 
+      <Checkpoint
+        position={[-9, 0.5, -2.8]}
         rotation={[0, -Math.PI / 2, 0]}
         checkpointNumber={3}
         onCheckpoint={onCheckpoint}
