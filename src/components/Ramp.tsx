@@ -1,3 +1,4 @@
+// src/components/Ramp.tsx
 import { useTrimesh } from '@react-three/cannon';
 import { useGLTF } from '@react-three/drei';
 import { Mesh, BufferGeometry } from 'three';

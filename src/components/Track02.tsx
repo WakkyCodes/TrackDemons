@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+// src/components/Track02.tsx
+>>>>>>> 514f0c2 (created minimap)
 import { useGLTF } from '@react-three/drei';
 import ColliderBox from './ColliderBox';
 
