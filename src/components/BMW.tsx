@@ -14,13 +14,15 @@ import { useGLTF } from '@react-three/drei'
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
   startPosition?: [number, number, number]
+  startRotation?: [number, number, number]
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7] }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7], startRotation = [0, 0, 0]}, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1000,
       position: startPosition,
+      rotation: startRotation,
       args: [0, 0.5, 2],
       linearDamping: 0.3,
       angularDamping: 0.4,

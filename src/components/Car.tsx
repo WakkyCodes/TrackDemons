@@ -15,13 +15,15 @@ interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
   startPosition?: [number, number, number]
   disabled?: boolean // Add disabled prop
+  startRotation?: [number, number, number]
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]  }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 400,
       position: startPosition,
+      rotation: startRotation,
       args: [0, 0.5, 2],
       linearDamping: 0.4,
       angularDamping: 0.4,

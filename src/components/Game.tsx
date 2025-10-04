@@ -136,17 +136,17 @@ const CurrentCar = carComponents[selectedCar]
             <Track01 
               key="track01" 
               onCheckpoint={handleCheckpoint}
-              
             />
           )}
           {currentLevel === 2 && <Track02 key="track02" />}
 
-        
-            <CurrentCar
-              ref={carRef}
-              startPosition={currentLevel === 1 ? [9, 2.5, -7] : [0, 2.5, 0]}
-              onHudUpdate={setHudData}
-            />
+          <CurrentCar
+            ref={carRef}
+            startPosition={currentLevel === 1 ? [10, 2.5, -7] : [-12, 2.5, -16]}
+            // flip the car for level 2
+            startRotation={currentLevel === 2 ? [0, Math.PI, 0] : [0, 0, 0]}
+            onHudUpdate={setHudData}
+          />
 
           <CarSound speed={hudData.speed} gear={hudData.gear} />
         </Physics>
