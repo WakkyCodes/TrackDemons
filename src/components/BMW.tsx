@@ -14,19 +14,18 @@ import { useGLTF } from '@react-three/drei'
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
   startPosition?: [number, number, number]
-  disabled?: boolean // Add disabled prop
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7] }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
-      mass: 400,
+      mass: 1000,
       position: startPosition,
       args: [0, 0.5, 2],
-      linearDamping: 0.4,
+      linearDamping: 0.3,
       angularDamping: 0.4,
       material: {
-        friction: 0.5,
+        friction: 0.8,
         restitution: 0.1,
       },
       angularFactor: [0, 1, 0],
@@ -57,41 +56,8 @@ const Car = forwardRef<Mesh, CarProps>(
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      // Stop all car movement when disabled
-      if (disabled) {
-        api.velocity.set(0, velocity.current[1], 0)
-        api.angularVelocity.set(0, 0, 0)
-        currentSpeed.current = 0
-        targetSpeed.current = 0
-        
-        // Update HUD to show 0 speed when disabled
-        if (speed !== 0 || gear !== 'N') {
-          setSpeed(0)
-          setGear('N')
-          onHudUpdate?.({ speed: 0, gear: 'N' })
-        }
-        return
-      }
-
-
-      // Stop all car movement when disabled
-      if (disabled) {
-        api.velocity.set(0, velocity.current[1], 0)
-        api.angularVelocity.set(0, 0, 0)
-        currentSpeed.current = 0
-        targetSpeed.current = 0
-        
-        // Update HUD to show 0 speed when disabled
-        if (speed !== 0 || gear !== 'N') {
-          setSpeed(0)
-          setGear('N')
-          onHudUpdate?.({ speed: 0, gear: 'N' })
-        }
-        return
-      }
-
-      const maxSpeed = 15
-      const acceleration = 7
+      const maxSpeed = 10
+      const acceleration = 5
       const deceleration = 3
       const turnSpeed = 6
 
@@ -166,13 +132,13 @@ const Car = forwardRef<Mesh, CarProps>(
       }
     })
 
-    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/bmw_m3.glb`)
 
     return (
       <mesh ref={physicsRef} castShadow>
-        <group position={[-3.5, 0, 0]}>
-          <primitive object={scene} scale={0.01} />
-        </group>
+       <group position={[0.7, 0, 0]}>
+    <primitive object={scene} scale={0.5} />
+  </group>
       </mesh>
     )
   }
