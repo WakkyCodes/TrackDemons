@@ -1,7 +1,18 @@
-# 🚀 High Octane Racer
+# 🚀 Track Demons
 
 A blazing-fast 3D car game built with React, Three.js, and Vite. Get ready for a world of dynamic racing, thrilling stunts, and high-energy physics!
 
+---
+
+## 🚀 Live Demo
+
+You can play the live version of the game right in your browser!
+
+**[➡️ Click here to play! 🏎️💨](https://wakkycodes.github.io/TrackDemons/)**
+
+
+
+---
 
 ## 🏁 Getting Started
 
@@ -11,8 +22,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 You need to have **Node.js** (version 18.x or later), **npm**, and **Git LFS** installed on your system.
 
-- [Node.js](https://nodejs.org/)  
-- [Git LFS](https://git-lfs.com/)
+-   [Node.js](https://nodejs.org/)
+-   [Git LFS](https://git-lfs.com/)
 
 ### Installation & Setup
 
@@ -20,7 +31,7 @@ Follow these simple steps to get the development environment running:
 
 1.  **Clone the repository**
     ```sh
-    git clone https://github.com/wakkycodes/TrackDemons.git
+    git clone [https://github.com/wakkycodes/TrackDemons.git](https://github.com/wakkycodes/TrackDemons.git)
     ```
 
 2.  **Retrieve LFS objects (models, textures, etc.)**
@@ -51,12 +62,12 @@ Follow these simple steps to get the development environment running:
 
 ## 🎮 Controls
 
-| Key             | Action              |
-| :-------------- | :------------------ |
-| `W` / `ArrowUp` | Accelerate Forward  |
-| `S` / `ArrowDown`| Brake / Reverse     |
-| `A` / `ArrowLeft`| Turn Left           |
-| `D` / `ArrowRight`| Turn Right          |
+| Key | Action |
+| :--- | :--- |
+| `W` / `ArrowUp` | Accelerate Forward |
+| `S` / `ArrowDown`| Brake / Reverse |
+| `A` / `ArrowLeft`| Turn Left |
+| `D` / `ArrowRight`| Turn Right |
 
 ---
 
@@ -85,5 +96,3 @@ Here are some of the features planned for the future:
 -   [ ] Selection of different car models with unique stats
 
 ---
-
-## 📄 License
