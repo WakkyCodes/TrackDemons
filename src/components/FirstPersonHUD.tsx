@@ -1,3 +1,4 @@
+// FirstPersonHUD.tsx
 import DashboardOverlay from './DashboardOverlay';
 import AnalogSpeedometer from './AnalogSpeedometer';
 
