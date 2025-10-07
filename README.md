@@ -91,8 +91,8 @@ Here are some of the features planned for the future:
 -   [x] Basic car physics and keyboard controls
 -   [ ] Stunt ramps, loops, and dynamic obstacles
 -   [x] UI for speedometer and race info
--   [ ] Multiple camera modes (First-person, Cinematic)
--   [ ] Sound effects for engine, collisions, and environment
--   [ ] Selection of different car models with unique stats
+-   [x] Multiple camera modes (First-person, Cinematic)
+-   [x] Sound effects for engine, collisions, and environment
+-   [x] Selection of different car models
 
 ---
