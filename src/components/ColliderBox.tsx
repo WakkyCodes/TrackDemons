@@ -30,12 +30,12 @@ export default function ColliderBox({
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={scale} />
-      <meshBasicMaterial 
+      {/*<meshBasicMaterial 
         color="red" 
         wireframe 
         transparent 
         opacity={0.5}
-      />
+      />*/}
     </mesh>
   )
 }
