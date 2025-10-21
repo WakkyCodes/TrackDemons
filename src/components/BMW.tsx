@@ -21,7 +21,7 @@ const Car = forwardRef<Mesh, CarProps>(
   ({ onHudUpdate, startPosition = [9, 9, -7], startRotation = [0, 0, 0]}, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1500, // Increased for BMW M3 weight
-      position: startPosition,
+            position: [startPosition[0], 0.5, startPosition[2]],
       rotation: startRotation,
       args: [1.8, 0.5, 4.6], // Better match BMW M3 dimensions
       linearDamping: 0.7,    // Increased for less sliding
