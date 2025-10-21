@@ -22,7 +22,7 @@ const Car = forwardRef<Mesh, CarProps>(
   ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]  }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1200, // Increased for more realistic car weight
-      position: startPosition,
+      position: [startPosition[0], 0.5, startPosition[2]],
       rotation: startRotation,
       args: [1.8, 0.5, 4.5], // Better match car dimensions (width, height, length)
       linearDamping: 0.8,    // Increased for less sliding
@@ -96,7 +96,7 @@ const Car = forwardRef<Mesh, CarProps>(
 
       const maxSpeed = 15
       const maxReverseSpeed = 8 // Lower max speed for reverse
-      const acceleration = 15      // Increased for more responsive control
+      const acceleration = 12      // Increased for more responsive control
       const deceleration = 8       // Increased for quicker stopping
       const turnSpeed = 3          // Reduced for smoother turning
 
@@ -182,9 +182,9 @@ const Car = forwardRef<Mesh, CarProps>(
         currentGear = 'R'
       } else {
         // Forward gears
-        if (speedKmh < 30) currentGear = '1'
-        else if (speedKmh < 60) currentGear = '2'
-        else if (speedKmh < 90) currentGear = '3'
+        if (speedKmh < 10) currentGear = '1'
+        else if (speedKmh < 22) currentGear = '2'
+        else if (speedKmh < 30) currentGear = '3'
         else currentGear = '4'
       }
 

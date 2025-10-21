@@ -76,7 +76,7 @@ const Car = forwardRef<Mesh, CarProps>(
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      const maxSpeed = 10
+      const maxSpeed = 15
       const maxReverseSpeed = 6 // Lower max speed for reverse
       const acceleration = 12      // Increased for more responsive control
       const deceleration = 6       // Increased for quicker stopping
