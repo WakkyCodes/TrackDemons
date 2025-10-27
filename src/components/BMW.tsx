@@ -1,6 +1,7 @@
 import { useBox } from '@react-three/cannon'
 import { useFrame } from '@react-three/fiber'
 import { Mesh, Quaternion, Vector3 } from 'three'
+import { ExhaustParticles } from './ExhaustParticles' 
 import {
   forwardRef,
   useEffect,
@@ -20,7 +21,7 @@ interface CarProps {
 const Car = forwardRef<Mesh, CarProps>(
   ({ onHudUpdate, startPosition = [9, 9, -7], startRotation = [0, 0, 0]}, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
-      mass: 1500, // Increased for BMW M3 weight
+      mass: 1500, 
             position: [startPosition[0], 0.5, startPosition[2]],
       rotation: startRotation,
       args: [1.8, 0.5, 4.6], // Better match BMW M3 dimensions
@@ -28,7 +29,7 @@ const Car = forwardRef<Mesh, CarProps>(
       angularDamping: 0.7,   // Increased for less rotational bounce
       material: {
         friction: 0.4,       // Adjusted for smoother movement
-        restitution: 0.1,    // Keep low to prevent bouncing
+        restitution: 0.1,    
       },
       angularFactor: [0, 1, 0],
       linearFactor: [1, 0, 1],
@@ -183,8 +184,13 @@ const Car = forwardRef<Mesh, CarProps>(
     return (
       <mesh ref={physicsRef} castShadow>
        <group position={[0.7, 0, 0]}>
-    <primitive object={scene} scale={0.5} />
+    <primitive object={scene} scale={0.4} />
   </group>
+   <ExhaustParticles 
+            carSpeed={speed} 
+            isReversing={isReversing.current}
+            position={[0.6, 0, 0]} // Adjust this for your first car
+          />
       </mesh>
     )
   }

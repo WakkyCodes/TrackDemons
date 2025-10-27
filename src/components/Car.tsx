@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
+import { ExhaustParticles } from './ExhaustParticles' 
 import { useGLTF } from '@react-three/drei'
 
 interface CarProps {
@@ -22,7 +23,7 @@ const Car = forwardRef<Mesh, CarProps>(
   ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]  }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1200, // Increased for more realistic car weight
-      position: [startPosition[0], 0.5, startPosition[2]],
+      position: [startPosition[0], 0.26, startPosition[2]],
       rotation: startRotation,
       args: [1.8, 0.5, 4.5], // Better match car dimensions (width, height, length)
       linearDamping: 0.8,    // Increased for less sliding
@@ -200,9 +201,15 @@ const Car = forwardRef<Mesh, CarProps>(
 
     return (
       <mesh ref={physicsRef} castShadow>
-        <group position={[-3.5, 0, 0]}>
-          <primitive object={scene} scale={0.01} />
+        <group position={[-2.5, 0, 0]}>
+          <primitive object={scene} scale={0.006} />
         </group>
+         {}
+        <ExhaustParticles 
+          carSpeed={speed} 
+          isReversing={isReversing.current}
+          position={[-0.4, 0, 0]} 
+        />
       </mesh>
     )
   }
