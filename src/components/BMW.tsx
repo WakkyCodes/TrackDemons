@@ -15,14 +15,15 @@ import { useGLTF } from '@react-three/drei'
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
   startPosition?: [number, number, number]
+  disabled?: boolean // Add disabled prop
   startRotation?: [number, number, number]
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7], startRotation = [0, 0, 0]}, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]}, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1500, 
-            position: [startPosition[0], 0.5, startPosition[2]],
+      position: [startPosition[0], 0.5, startPosition[2]],
       rotation: startRotation,
       args: [1.8, 0.5, 4.6], // Better match BMW M3 dimensions
       linearDamping: 0.7,    // Increased for less sliding
@@ -76,6 +77,23 @@ const Car = forwardRef<Mesh, CarProps>(
 
     useFrame((_, delta) => {
       if (!physicsRef.current) return
+
+      // Stop all car movement when disabled
+      if (disabled) {
+        api.velocity.set(0, velocity.current[1], 0)
+        api.angularVelocity.set(0, 0, 0)
+        currentSpeed.current = 0
+        targetSpeed.current = 0
+        isReversing.current = false
+        
+        // Update HUD to show 0 speed when disabled
+        if (speed !== 0 || gear !== 'N') {
+          setSpeed(0)
+          setGear('N')
+          onHudUpdate?.({ speed: 0, gear: 'N' })
+        }
+        return
+      }
 
       const maxSpeed = 15
       const maxReverseSpeed = 6 // Lower max speed for reverse

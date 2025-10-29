@@ -41,24 +41,36 @@ export default function SimpleCheckpoint({
       {/* Invisible trigger */}
       <mesh ref={ref} visible={false} />
       
-      {/* Simple visual indicator */}
+      {/* Transparent visual indicator */}
       <group position={position} rotation={rotation}>
-        {/* Pole */}
+        {/* Pole - semi-transparent */}
         <mesh position={[0, 1.5, 0]}>
           <cylinderGeometry args={[0.1, 0.1, 3, 8]} />
-          <meshStandardMaterial color="#888888" />
+          <meshStandardMaterial 
+            color="#888888" 
+            transparent 
+            opacity={0.6} 
+          />
         </mesh>
         
-        {/* Flag */}
+        {/* Flag - semi-transparent */}
         <mesh position={[0.8, 2.5, 0]} rotation={[0, 0, Math.PI / 2]}>
           <planeGeometry args={[1.5, 1]} />
-          <meshStandardMaterial color={triggered ? "#4CAF50" : "#f44336"} />
+          <meshStandardMaterial 
+            color={triggered ? "#4CAF50" : "#f44336"} 
+            transparent 
+            opacity={0.6} 
+          />
         </mesh>
         
-        {/* Base */}
+        {/* Base - semi-transparent */}
         <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[1.5, 1.5, 0.2, 16]} />
-          <meshStandardMaterial color="#555555" />
+          <meshStandardMaterial 
+            color="#555555" 
+            transparent 
+            opacity={0.6} 
+          />
         </mesh>
       </group>
     </group>
