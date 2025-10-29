@@ -1,4 +1,4 @@
-// Track01.tsx
+// src/components/Track01.tsx
 import { useGLTF } from '@react-three/drei';
 import ColliderBox from './ColliderBox';
 import Ramp from './Ramp';
@@ -28,14 +28,16 @@ export default function Track01({ onCheckpoint }: Track01Props) {
       {/* Covered car */}
       <CoveredCar position={[7.9, 0, -3]} />
 
-      {/* CHECKPOINTS - All checkpoints are always visible and functional */}
+      {/* CHECKPOINTS */}
+      {/* Checkpoint 1 - Near the starting area */}
       <Checkpoint 
         position={[10.5, 0.5, -4]} 
-        rotation={[0, Math.PI / 17, 0]}
+        rotation={[0, 0, 0]}
         checkpointNumber={1}
         onCheckpoint={onCheckpoint}
       />
       
+      {/* Checkpoint 2 - After the first turn */}
       <Checkpoint 
         position={[0, 0.5, 14.3]} 
         rotation={[0, Math.PI / 1.47, 0]}
@@ -43,6 +45,7 @@ export default function Track01({ onCheckpoint }: Track01Props) {
         onCheckpoint={onCheckpoint}
       />
       
+      {/* Checkpoint 3 - Near the finish line */}
       <Checkpoint 
         position={[-9, 0.5, -2.8]} 
         rotation={[0, -Math.PI / 2, 0]}

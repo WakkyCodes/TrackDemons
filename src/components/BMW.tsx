@@ -1,7 +1,6 @@
 import { useBox } from '@react-three/cannon'
 import { useFrame } from '@react-three/fiber'
 import { Mesh, Quaternion, Vector3 } from 'three'
-import { ExhaustParticles } from './ExhaustParticles' 
 import {
   forwardRef,
   useEffect,
@@ -15,25 +14,21 @@ import { useGLTF } from '@react-three/drei'
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
   startPosition?: [number, number, number]
-  disabled?: boolean // Add disabled prop
-  startRotation?: [number, number, number]
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]}, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7] }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
-      mass: 1500, 
-      position: [startPosition[0], 0.5, startPosition[2]],
-      rotation: startRotation,
-      args: [1.8, 0.5, 4.6], // Better match BMW M3 dimensions
-      linearDamping: 0.7,    // Increased for less sliding
-      angularDamping: 0.7,   // Increased for less rotational bounce
+      mass: 1000,
+      position: startPosition,
+      args: [0, 0.5, 2],
+      linearDamping: 0.3,
+      angularDamping: 0.4,
       material: {
-        friction: 0.4,       // Adjusted for smoother movement
-        restitution: 0.1,    
+        friction: 0.8,
+        restitution: 0.1,
       },
       angularFactor: [0, 1, 0],
-      linearFactor: [1, 0, 1],
     }))
 
     useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
@@ -48,7 +43,6 @@ const Car = forwardRef<Mesh, CarProps>(
 
     const currentSpeed = useRef(0)
     const targetSpeed = useRef(0)
-    const isReversing = useRef(false)
 
     useEffect(() => {
       const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
@@ -59,114 +53,62 @@ const Car = forwardRef<Mesh, CarProps>(
       }
     }, [api])
 
-    // Add velocity limiting to prevent extreme speeds
-    useEffect(() => {
-      // Limit maximum velocity to prevent extreme speeds
-      const interval = setInterval(() => {
-        const [vx, vy, vz] = velocity.current
-        const currentSpeed = Math.sqrt(vx*vx + vz*vz)
-        
-        if (currentSpeed > 25) { // Cap maximum speed
-          const factor = 25 / currentSpeed
-          api.velocity.set(vx * factor, vy, vz * factor)
-        }
-      }, 100)
-      
-      return () => clearInterval(interval)
-    }, [api])
-
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      // Stop all car movement when disabled
-      if (disabled) {
-        api.velocity.set(0, velocity.current[1], 0)
-        api.angularVelocity.set(0, 0, 0)
-        currentSpeed.current = 0
-        targetSpeed.current = 0
-        isReversing.current = false
-        
-        // Update HUD to show 0 speed when disabled
-        if (speed !== 0 || gear !== 'N') {
-          setSpeed(0)
-          setGear('N')
-          onHudUpdate?.({ speed: 0, gear: 'N' })
-        }
-        return
-      }
-
-      const maxSpeed = 15
-      const maxReverseSpeed = 6 // Lower max speed for reverse
-      const acceleration = 12      // Increased for more responsive control
-      const deceleration = 6       // Increased for quicker stopping
-      const turnSpeed = 2.5        // Reduced for smoother turning
+      const maxSpeed = 10
+      const acceleration = 5
+      const deceleration = 3
+      const turnSpeed = 6
 
       // Speed control
       if (keys.forward) {
         targetSpeed.current = -maxSpeed
-        isReversing.current = false
       } else if (keys.backward) {
-        targetSpeed.current = maxReverseSpeed
-        isReversing.current = true
+        targetSpeed.current = 5
       } else {
         targetSpeed.current = 0
-        // Don't reset isReversing here - we want to maintain the state until we start moving forward
       }
 
-      // Smooth acceleration/deceleration with delta time
-      const speedDiff = targetSpeed.current - currentSpeed.current
-      const accelerationRate = Math.abs(speedDiff) > 0.1 ? 
-        (speedDiff > 0 ? acceleration : deceleration) : deceleration
-      
-      currentSpeed.current += speedDiff * accelerationRate * delta
-      currentSpeed.current = Math.max(-maxSpeed, Math.min(maxReverseSpeed, currentSpeed.current))
+      if (currentSpeed.current < targetSpeed.current) {
+        currentSpeed.current += acceleration * delta
+        currentSpeed.current = Math.min(currentSpeed.current, targetSpeed.current)
+      } else if (currentSpeed.current > targetSpeed.current) {
+        currentSpeed.current -= deceleration * delta
+        currentSpeed.current = Math.max(currentSpeed.current, targetSpeed.current)
+      }
 
-      // Smoother turn control
+      // Turn control
       const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
-      
-      if (turnDirection !== 0 && Math.abs(currentSpeed.current) > 0.5) {
-        const turnIntensity = Math.min(1, Math.abs(currentSpeed.current) / maxSpeed) * 0.6
-        
+
+      if (turnDirection === 0) {
+        api.angularVelocity.set(0, 0, 0)
+      } else {
+        const turnIntensity = Math.min(
+          1,
+          Math.abs(currentSpeed.current) / maxSpeed
+        )
+
         let effectiveTurnDirection = turnDirection
-        
-        // Reverse turning direction when in reverse
-        if (isReversing.current) {
-          effectiveTurnDirection = -turnDirection
-        } else if (currentSpeed.current > 0) {
+        if (currentSpeed.current > 0) {
           effectiveTurnDirection = -turnDirection
         }
 
         const finalTurnSpeed = effectiveTurnDirection * turnSpeed * turnIntensity
-        
-        // Smooth angular velocity application
         api.angularVelocity.set(0, finalTurnSpeed, 0)
-      } else {
-        // Gradual stop of rotation
-        api.angularVelocity.set(0, 0, 0)
       }
 
-      // Apply movement only if significant speed
-      if (Math.abs(currentSpeed.current) > 0.1) {
+      // Apply movement
+      if (Math.abs(currentSpeed.current) > 0.01) {
         const forwardVector = new Vector3(0, 0, -1)
         const carQuaternion = new Quaternion().fromArray(rotation.current)
         const worldDirection = forwardVector.applyQuaternion(carQuaternion)
-        
-        // Use lerp for smoother direction changes
+
         worldDirection.multiplyScalar(currentSpeed.current)
-        
-        const currentVel = new Vector3(velocity.current[0], velocity.current[1], velocity.current[2])
-        const targetVel = new Vector3(worldDirection.x, 0, worldDirection.z)
-        
-        // Smooth velocity transition
-        currentVel.lerp(targetVel, 4 * delta)
-        
-        api.velocity.set(currentVel.x, velocity.current[1], currentVel.z)
-      } else {
-        // Gradual stop
+        api.velocity.set(worldDirection.x, velocity.current[1], worldDirection.z)
+      } else if (turnDirection === 0) {
         currentSpeed.current = 0
-        const currentVel = new Vector3(velocity.current[0], velocity.current[1], velocity.current[2])
-        currentVel.lerp(new Vector3(0, velocity.current[1], 0), 6 * delta)
-        api.velocity.set(currentVel.x, currentVel.y, currentVel.z)
+        api.velocity.set(0, velocity.current[1], 0)
       }
 
       // Calculate HUD data
@@ -174,20 +116,13 @@ const Car = forwardRef<Mesh, CarProps>(
       const speedMs = Math.sqrt(vx * vx + vz * vz)
       const speedKmh = Math.abs(speedMs * 3.6)
 
-      // Determine gear with reverse support
+      // Determine gear
       let currentGear = 'N'
-      
-      if (speedKmh === 0) {
-        currentGear = 'N'
-      } else if (isReversing.current) {
-        currentGear = 'R'
-      } else {
-        // Forward gears
-        if (speedKmh < 30) currentGear = '1'
-        else if (speedKmh < 60) currentGear = '2'
-        else if (speedKmh < 90) currentGear = '3'
-        else currentGear = '4'
-      }
+      if (speedKmh === 0) currentGear = 'N'
+      else if (speedKmh < 30) currentGear = '1'
+      else if (speedKmh < 60) currentGear = '2'
+      else if (speedKmh < 90) currentGear = '3'
+      else currentGear = '4'
 
       // Update state and parent
       if (Math.abs(speedKmh - speed) > 0.5 || currentGear !== gear) {
@@ -202,13 +137,8 @@ const Car = forwardRef<Mesh, CarProps>(
     return (
       <mesh ref={physicsRef} castShadow>
        <group position={[0.7, 0, 0]}>
-    <primitive object={scene} scale={0.4} />
+    <primitive object={scene} scale={0.5} />
   </group>
-   <ExhaustParticles 
-            carSpeed={speed} 
-            isReversing={isReversing.current}
-            position={[0.6, 0, 0]} // Adjust this for your first car
-          />
       </mesh>
     )
   }
