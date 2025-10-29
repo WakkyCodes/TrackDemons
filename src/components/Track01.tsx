@@ -31,7 +31,7 @@ export default function Track01({ onCheckpoint }: Track01Props) {
       {/* CHECKPOINTS - All checkpoints are always visible and functional */}
       <Checkpoint 
         position={[10.5, 0.5, -4]} 
-        rotation={[0, 0, 0]}
+        rotation={[0, Math.PI / 17, 0]}
         checkpointNumber={1}
         onCheckpoint={onCheckpoint}
       />
