@@ -13,15 +13,15 @@ type Menu3DProps = {
 
 const CAR_CONFIGS = {
   car: {
-    path: `${import.meta.env.BASE_URL}models/car.glb`,
-    scale: 0.01,
-    position: [0, 0.5, 0] as [number, number, number],
-    name: "Default Car"
+    path: `${import.meta.env.BASE_URL}models/car22.glb`,
+    scale: 80,
+    position: [0, 0, 0] as [number, number, number],
+    name: "Subaru"
   },
   bmw: {
     path: `${import.meta.env.BASE_URL}models/bmw_m3.glb`,
-    scale: 0.5,
-    position: [0, 0.5, 0] as [number, number, number],
+    scale: 0.8,
+    position: [0, 0, 0] as [number, number, number],
     name: "BMW M3"
   }
 };
