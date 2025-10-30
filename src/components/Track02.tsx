@@ -1,5 +1,7 @@
 // Track02.tsx
-import { useGLTF } from '@react-three/drei'
+import { useGLTF, useAnimations } from '@react-three/drei'
+import { useEffect, useRef } from 'react'
+import { Group } from 'three'
 import ColliderBox from './ColliderBox'
 import Checkpoint from './Checkpoint'
 
@@ -38,7 +40,64 @@ interface Track02Props {
 }
 
 export default function Track02({ onCheckpoint, activeCheckpoint }: Track02Props) {
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`)
+  const group = useRef<Group>(null)
+  const { scene, animations } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`)
+  const { actions, mixer } = useAnimations(animations, group)
+
+  useEffect(() => {
+  if (!actions) {
+    console.warn('No actions available')
+    return
+  }
+
+  console.log('Available animations:', Object.keys(actions))
+
+  const playedActions: string[] = []
+
+  // Play movingcarAction at normal speed
+  if (actions.movingcarAction) {
+    const action = actions.movingcarAction
+    action.reset()
+    action.timeScale = 0.6 // Normal speed (1x)
+    action.play()
+    playedActions.push('movingcarAction')
+    console.log('Playing movingcarAction at 1x speed')
+  } else {
+    console.warn('movingcarAction not found')
+  }
+
+  // Play movingcarAction2 at different speed
+  if (actions.movingcarAction2) {
+    const action = actions.movingcarAction2
+    action.reset()
+    action.timeScale = 0.7 // 1.5x faster (or 0.5 for half speed)
+    action.play()
+    playedActions.push('movingcarAction2')
+    console.log('Playing movingcarAction2 at 1.5x speed')
+  } else {
+    console.warn('movingcarAction2 not found')
+  }
+
+  // Cleanup function
+  return () => {
+    playedActions.forEach(animName => {
+      if (actions[animName]) {
+        actions[animName].stop()
+      }
+    })
+  }
+}, [actions])
+
+  // Update mixer on each frame for smooth animation
+  useEffect(() => {
+    if (!mixer) return
+
+    const interval = setInterval(() => {
+      mixer.update(0.01) // Update with delta time
+    }, 10)
+
+    return () => clearInterval(interval)
+  }, [mixer])
 
   // Define your wall boxes here
   const wallBoxes: { 
@@ -76,7 +135,7 @@ const curvedWall1 = createCurvedWall(
   
 
   return (
-    <>
+    <group ref={group}>
       <primitive object={scene} />
 
       {/* Render straight walls */}
@@ -116,6 +175,6 @@ const curvedWall1 = createCurvedWall(
         checkpointNumber={1}
         onCheckpoint={activeCheckpoint === 1 ? onCheckpoint : undefined}
       />
-    </>
+    </group>
   )
 }
