@@ -14,6 +14,7 @@ export default function App() {
           onSelectTrack={(track) => setSelectedTrack(track)} 
           selectedCar={selectedCar}        // Add this
           onCarChange={setSelectedCar}     // Add this
+          isInMenu={true}
         />
       ) : (
         <Game 

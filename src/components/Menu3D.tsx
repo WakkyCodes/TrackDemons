@@ -1,14 +1,17 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
-import { useRef, Suspense } from "react";
+import { useRef, Suspense, useState } from "react";
 import { Mesh } from "three";
+import MenuMusic from "./MenuSound";
+import { Settings } from "lucide-react"; // ⚙️ icon
 
-type CarModel = 'car' | 'bmw';
+type CarModel = "car" | "bmw";
 
 type Menu3DProps = {
   onSelectTrack: (track: number) => void;
   selectedCar: CarModel;
   onCarChange: (car: CarModel) => void;
+  isInMenu?: boolean;
 };
 
 const CAR_CONFIGS = {
@@ -16,14 +19,14 @@ const CAR_CONFIGS = {
     path: `${import.meta.env.BASE_URL}models/car.glb`,
     scale: 0.01,
     position: [0, 0.5, 0] as [number, number, number],
-    name: "Default Car"
+    name: "Default Car",
   },
   bmw: {
     path: `${import.meta.env.BASE_URL}models/bmw_m3.glb`,
     scale: 0.5,
     position: [0, 0.5, 0] as [number, number, number],
-    name: "BMW M3"
-  }
+    name: "BMW M3",
+  },
 };
 
 function MenuCar({ carModel }: { carModel: CarModel }) {
@@ -47,11 +50,17 @@ function MenuCar({ carModel }: { carModel: CarModel }) {
 // Map Menu Scene Component
 function MapMenuScene() {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/mapmenu.glb`);
-  
   return <primitive object={scene} />;
 }
 
-export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu3DProps) {
+export default function Menu3D({
+  onSelectTrack,
+  selectedCar,
+  onCarChange,
+  isInMenu,
+}: Menu3DProps) {
+  const [showSettings, setShowSettings] = useState(false);
+
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas shadows camera={{ position: [-1, 2, -3], fov: 80 }}>
@@ -61,14 +70,76 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
         <Suspense fallback={null}>
           {/* Map Menu Background */}
           <MapMenuScene />
-
           <MenuCar carModel={selectedCar} />
-
-          <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
+          <Environment
+            files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`}
+            background
+          />
         </Suspense>
 
         <OrbitControls enablePan={false} enableZoom={true} enableRotate={true} />
       </Canvas>
+
+      {/* 🎵 Menu Music */}
+      {isInMenu && <MenuMusic />}
+
+      {/* ⚙️ Settings Button */}
+      <button
+        onClick={() => setShowSettings(!showSettings)}
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          background: "rgba(0, 0, 0, 0.6)",
+          border: "none",
+          borderRadius: "50%",
+          padding: "10px",
+          cursor: "pointer",
+          color: "white",
+          transition: "transform 0.2s ease",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      >
+        <Settings size={28} />
+      </button>
+
+      {/* ⚙️ Settings Menu Dropdown */}
+      {showSettings && (
+        <div
+          style={{
+            position: "absolute",
+            top: "70px",
+            right: "20px",
+            background: "rgba(0, 0, 0, 0.8)",
+            borderRadius: "10px",
+            padding: "15px 20px",
+            color: "white",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+            minWidth: "180px",
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{ marginBottom: "10px", cursor: "pointer" }}
+            onClick={() => alert("🎵 Choose Sound clicked")}
+          >
+            🎵 Choose Sound
+          </div>
+          <div
+            style={{ marginBottom: "10px", cursor: "pointer" }}
+            onClick={() => alert("⚙️ Difficulty clicked")}
+          >
+            ⚙️ Difficulty
+          </div>
+          <div
+            style={{ cursor: "pointer" }}
+            onClick={() => alert("❓ Help clicked")}
+          >
+            ❓ Help
+          </div>
+        </div>
+      )}
 
       {/* Car Selection UI */}
       <div
@@ -85,13 +156,16 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
         }}
       >
         <button
-          onClick={() => onCarChange('car')}
+          onClick={() => onCarChange("car")}
           style={{
             padding: "10px 20px",
             fontSize: "16px",
-            backgroundColor: selectedCar === 'car' ? "#4CAF50" : "#555",
+            backgroundColor: selectedCar === "car" ? "#4CAF50" : "#555",
             color: "white",
-            border: selectedCar === 'car' ? "2px solid #4CAF50" : "2px solid transparent",
+            border:
+              selectedCar === "car"
+                ? "2px solid #4CAF50"
+                : "2px solid transparent",
             borderRadius: "6px",
             cursor: "pointer",
             fontWeight: "bold",
@@ -101,13 +175,16 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
           {CAR_CONFIGS.car.name}
         </button>
         <button
-          onClick={() => onCarChange('bmw')}
+          onClick={() => onCarChange("bmw")}
           style={{
             padding: "10px 20px",
             fontSize: "16px",
-            backgroundColor: selectedCar === 'bmw' ? "#4CAF50" : "#555",
+            backgroundColor: selectedCar === "bmw" ? "#4CAF50" : "#555",
             color: "white",
-            border: selectedCar === 'bmw' ? "2px solid #4CAF50" : "2px solid transparent",
+            border:
+              selectedCar === "bmw"
+                ? "2px solid #4CAF50"
+                : "2px solid transparent",
             borderRadius: "6px",
             cursor: "pointer",
             fontWeight: "bold",
