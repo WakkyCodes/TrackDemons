@@ -17,7 +17,7 @@ export default function ColliderWall({ position, args, color = 'orange' }: Colli
   return (
     <mesh ref={ref} position={position}>
       <boxGeometry args={args} />
-      <meshStandardMaterial color={color} transparent opacity={0.2} />
+      <meshStandardMaterial color={color} transparent opacity={0.5} />
     </mesh>
   );
 }
