@@ -10,15 +10,15 @@ import { CoveredCar } from './CoveredCar'
 import Checkpoint from './Checkpoint'
 
 interface Track01Props {
-  onCheckpoint?: (checkpointNumber: number) => void
+  onCheckpoint?: (checkpointNumber: number) => void;
   geometry?: BufferGeometry
   colorMap?: Texture
 }
 
-export default function Track01({ onCheckpoint, geometry, colorMap }: Track01Props) {
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track01.glb`)
+export default function Track01({ onCheckpoint }: Track01Props) {
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track01.glb`);
 
-    const bounds = useMemo(() => {
+  const bounds = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
     return {
       min: box.min,
@@ -29,10 +29,10 @@ export default function Track01({ onCheckpoint, geometry, colorMap }: Track01Pro
   }, [scene]);
   return (
     <>
-      {/* Visible track model */}
+      {/* This renders the visible track model. It has no physics itself. */}
       <primitive object={scene} />
 
-      {/* === Physics Walls Around Track === */}
+       {/* === Physics Walls Around Track === */}
       <ColliderWall
         position={[bounds.center.x, bounds.min.y - 0.5, bounds.center.z]}
         args={[bounds.size.x, 1, bounds.size.z]}
@@ -64,45 +64,51 @@ export default function Track01({ onCheckpoint, geometry, colorMap }: Track01Pro
         color="yellow"
       />
 
+      {/* All the invisible walls (ColliderBoxes) go here */}
+      
+      {/* <ColliderBox position={[-2.8, 0, 9.55]} rotation={[0, Math.PI / 4, 0]} />
+      <ColliderBox position={[-4.15, 0, 11.9]} rotation={[0, Math.PI / 3, 0]} /> */}
 
-      {/* Visible debug walls */}
+      {/*the three threes in the middle */}
       <ColliderBox position={[-2.8, 0, 9.55]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 4, 0]} visible={true} />
       <ColliderBox position={[-4.15, 0, 11.9]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 3, 0]} visible={true} />
       <ColliderBox position={[-5.5, 0, 10.6]} scale={[1.4, 6,1]} rotation={[0, Math.PI / 3, 0]}  visible={true} />
-
-
-      {/* Ramp */}
+      {/* This renders the ramp, both visibly and with its own physics */}
       <Ramp />
-
+      
       {/* Covered car */}
-      <CoveredCar position={[7.9, 0, -3]} />
+       <CoveredCar position={[7.9, 0, -3]} />
+     
 
-      {/* Checkpoints */}
-      <Checkpoint
-        position={[10.5, 0.5, -4]}
-        rotation={[0, 0, 0]}
+      {/* CHECKPOINTS - All checkpoints are always visible and functional */}
+      <Checkpoint 
+        position={[10.5, 0.5, -4]} 
+        rotation={[0, Math.PI / 17, 0]}
         checkpointNumber={1}
         onCheckpoint={onCheckpoint}
       />
-      <Checkpoint
-        position={[0, 0.5, 14.3]}
+      
+      <Checkpoint 
+        position={[0, 0.5, 14.3]} 
         rotation={[0, Math.PI / 1.47, 0]}
         checkpointNumber={2}
         onCheckpoint={onCheckpoint}
       />
-      <Checkpoint
-        position={[-9, 0.5, -2.8]}
+      
+      <Checkpoint 
+        position={[-9, 0.5, -2.8]} 
         rotation={[0, -Math.PI / 2, 0]}
         checkpointNumber={3}
         onCheckpoint={onCheckpoint}
       />
 
-      {/* Optional visible mesh (only renders if geometry and colorMap are passed) */}
+       {/* Optional visible mesh (only renders if geometry and colorMap are passed) 
       {geometry && colorMap && (
         <mesh geometry={geometry}>
           <meshBasicMaterial toneMapped={false} map={colorMap} />
         </mesh>
-      )}
+      )}*/}
+
      {/*on the side opposite to the stairs(other side of the road) */}
       <ColliderBox position={[3, 1, -0.3]} scale={[8, 3,1]} />
       <ColliderBox position={[-4, 1, -0.3]} scale={[8, 3,1]} />
@@ -138,12 +144,6 @@ export default function Track01({ onCheckpoint, geometry, colorMap }: Track01Pro
 
       {}
       <ColliderBox position={[1, 0, 6]} scale={[8, 3,1]} rotation={[0, Math.PI / 5, 0]}/>
-
-      
-      
-
-
-    
     </>
-  )
+  );
 }
