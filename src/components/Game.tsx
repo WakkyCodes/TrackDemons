@@ -1,4 +1,3 @@
-// Game.tsx
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
@@ -28,15 +27,25 @@ type GameProps = {
   selectedCar: CarModel 
   onBackToMenu: () => void
 }
+
+// Define the car handle interface to match what we created in Car.tsx
+interface CarHandle {
+  activateBoost: (multiplier?: number, duration?: number) => void
+  getSpeed: () => number
+  getBoostActive: () => boolean
+}
+
 const carComponents = {
   car: Car,
   bmw: BMW,
 }
 
 export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
-  const carRef = useRef<Mesh>(null)
+  // Update the ref type to include both Mesh and CarHandle
+  const carRef = useRef<Mesh & CarHandle>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
-  const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
+  // Update HUD data to include boostActive
+  const [hudData, setHudData] = useState({ speed: 0, gear: 'N', boostActive: false })
   const [currentLevel, setCurrentLevel] = useState(track)
   const [gameStarted, setGameStarted] = useState(false)
   const [showControls, setShowControls] = useState(true)
@@ -47,14 +56,21 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
   const [track1Checkpoints, setTrack1Checkpoints] = useState<number[]>([])
   const [track2Checkpoints, setTrack2Checkpoints] = useState<number[]>([])
   const [activeCheckpoint, setActiveCheckpoint] = useState<number | null>(null)
+  // Add boost state for visual feedback
+  const [boostActive, setBoostActive] = useState(false)
+const [gameFailed, setGameFailed] = useState(false)
+const [gameWon, setGameWon] = useState(false)
+const [completedTrack, setCompletedTrack] = useState<number | null>(null)
+const [failedCheckpoint, setFailedCheckpoint] = useState<number | null>(null)
 
   const keys = useKeyboard()
-const CurrentCar = carComponents[selectedCar]
+  const CurrentCar = carComponents[selectedCar]
 
   // Reset car ref when switching tracks
   useEffect(() => {
     if (carRef.current) {
-      // You might want to reset any car-specific state here if needed
+      // Reset boost state when switching tracks
+      setBoostActive(false)
     }
   }, [currentLevel])
   
@@ -78,44 +94,94 @@ const CurrentCar = carComponents[selectedCar]
 
   // Handle checkpoint timeout - UPDATED FOR BOTH TRACKS
   const handleCheckpointTimeout = (checkpointNumber: number) => {
-    console.log(`Time's up for checkpoint ${checkpointNumber}!`);
     
     // Reset to the checkpoint that timed out (not previous one)
-    setCurrentCheckpoint(Math.max(0, checkpointNumber - 1));
-    setCheckpoints(checkpoints.filter(cp => cp < checkpointNumber));
-    
-    // Keep the same checkpoint active to try again
-    setTimeout(() => {
-      setActiveCheckpoint(checkpointNumber);
-    }, 100);
-    
-    console.log(`Reset to checkpoint ${checkpointNumber}`);
+   setGameFailed(true);
+  setFailedCheckpoint(checkpointNumber);
+  setGameStarted(false); // Stop the game
   };
 
-  // Handle checkpoint events - UPDATED FOR BOTH TRACKS
-  const handleCheckpoint = (checkpointNumber: number) => {
-    if (!checkpoints.includes(checkpointNumber)) {
-      const newCheckpoints = [...checkpoints, checkpointNumber];
-      setCheckpoints(newCheckpoints);
-      setCurrentCheckpoint(checkpointNumber);
-      
-      // Set next checkpoint as active, or null if it's the last one
-      const nextCheckpoint = checkpointNumber < 3 ? checkpointNumber + 1 : null;
-      
-      // Small delay to ensure smooth transition between checkpoints
-      setTimeout(() => {
-        setActiveCheckpoint(nextCheckpoint);
-      }, 100);
-      
-      // Store track-specific checkpoints
-      if (currentLevel === 1) {
-        setTrack1Checkpoints(newCheckpoints);
-      } else if (currentLevel === 2) {
-        setTrack2Checkpoints(newCheckpoints);
-      }
-      
-      console.log(`Checkpoint ${checkpointNumber} reached! Next: ${nextCheckpoint}`);
+  const handleRestartGame = () => {
+  // Reset all game states
+  setGameFailed(false);
+  setFailedCheckpoint(null);
+  setGameStarted(false);
+  setShowControls(false);
+  setShowCountdown(true);
+  setActiveCheckpoint(null);
+  setCheckpoints([]);
+  setCurrentCheckpoint(0);
+  setBoostActive(false);
+  
+  // Force re-render of physics and car
+  setKey(prev => prev + 1);
+  
+  console.log('Game restarted from beginning');
+};
+
+const handleCheckpoint = (checkpointNumber: number) => {
+
+  setCheckpoints(prevCheckpoints => {
+    if (prevCheckpoints.includes(checkpointNumber)) 
+      {
+    
+      return prevCheckpoints;
     }
+    
+    const newCheckpoints = [...prevCheckpoints, checkpointNumber];
+
+    setCurrentCheckpoint(checkpointNumber);
+    
+    if (carRef.current && carRef.current.activateBoost) {
+      const boostStrength = 1.5 + (checkpointNumber * 0.1);
+      const boostDuration = 2.5;
+      carRef.current.activateBoost(boostStrength, boostDuration);
+      setBoostActive(true);
+      setTimeout(() => setBoostActive(false), boostDuration * 1000);
+    }
+    
+    // Set next checkpoint
+    const nextCheckpoint = checkpointNumber < 3 ? checkpointNumber + 1 : null;
+    setTimeout(() => {
+      setActiveCheckpoint(nextCheckpoint);
+    }, 100);
+    
+    // Store track-specific checkpoints
+    if (currentLevel === 1) {
+      setTrack1Checkpoints(newCheckpoints);
+    } else if (currentLevel === 2) {
+      setTrack2Checkpoints(newCheckpoints);
+    }
+    
+    return newCheckpoints;
+  });
+};
+
+// Add this useEffect to handle the win condition
+useEffect(() => {
+  
+  const hasAllCheckpoints = checkpoints.includes(1) && 
+                           checkpoints.includes(2) && 
+                           checkpoints.includes(3);
+  
+  if (hasAllCheckpoints && gameStarted && !gameWon) {
+    setGameWon(true);
+    setCompletedTrack(currentLevel);
+    setGameStarted(false);
+    setActiveCheckpoint(null);
+  }
+}, [checkpoints, gameStarted, gameWon, currentLevel]);
+  const handleBackToMenuFromFailure = () => {
+  setGameFailed(false);
+  setFailedCheckpoint(null);
+  onBackToMenu();
+};
+  // Update HUD data handler to include boost status
+  const handleHudUpdate = (data: { speed: number; gear: string; boostActive?: boolean }) => {
+    setHudData(prev => ({
+      ...data,
+      boostActive: data.boostActive !== undefined ? data.boostActive : prev.boostActive
+    }));
   };
 
   // Reset game state when track changes
@@ -127,6 +193,7 @@ const CurrentCar = carComponents[selectedCar]
     setShowCountdown(false)
     setShowControls(false)
     setActiveCheckpoint(null)
+    setBoostActive(false) // Reset boost state
     
     // Reset current checkpoint state but preserve track-specific states
     setCheckpoints([])
@@ -140,6 +207,45 @@ const CurrentCar = carComponents[selectedCar]
       setShowCountdown(true)
     }, 500)
   }
+
+  const handleSwitchTrack = () => {
+  const nextTrack = currentLevel === 1 ? 2 : 1;
+  
+  // Reset win state
+  setGameWon(false);
+  setCompletedTrack(null);
+  
+  // Switch to the other track
+  setCurrentLevel(nextTrack);
+  setGameStarted(false);
+  setShowCountdown(true);
+  setActiveCheckpoint(null);
+  setCheckpoints([]);
+  setCurrentCheckpoint(0);
+  setBoostActive(false);
+  
+  // Force re-render
+  setKey(prev => prev + 1);
+  
+  console.log(`Switching to Track ${nextTrack}`);
+};
+
+// Add this function to handle restarting the same track after winning
+const handleRestartSameTrack = () => {
+  setGameWon(false);
+  setCompletedTrack(null);
+  setGameStarted(false);
+  setShowCountdown(true);
+  setActiveCheckpoint(null);
+  setCheckpoints([]);
+  setCurrentCheckpoint(0);
+  setBoostActive(false);
+  
+  // Force re-render
+  setKey(prev => prev + 1);
+  
+  console.log(`Restarting Track ${currentLevel}`);
+};
 
   // Restore track-specific checkpoints when switching tracks
   useEffect(() => {
@@ -167,7 +273,6 @@ const CurrentCar = carComponents[selectedCar]
     setCurrentLevel(track)
   }, [track])
 
-  // Set the initial active checkpoint when game starts - UPDATED FOR BOTH TRACKS
   useEffect(() => {
     if (gameStarted) {
       // Small delay to ensure everything is loaded
@@ -175,14 +280,14 @@ const CurrentCar = carComponents[selectedCar]
         setActiveCheckpoint(1);
         setCheckpoints([]);
         setCurrentCheckpoint(0);
+        setBoostActive(false); // Reset boost on game start
       }, 100);
     }
   }, [gameStarted, currentLevel]);
 
-  // Reset countdowns when track changes - UPDATED FOR BOTH TRACKS
   useEffect(() => {
     if (gameStarted) {
-      // If we have checkpoints, continue from next one, otherwise start from 1
+
       if (checkpoints.length > 0) {
         const nextCheckpoint = Math.max(...checkpoints) + 1;
         setTimeout(() => {
@@ -223,10 +328,11 @@ const CurrentCar = carComponents[selectedCar]
 
           <CurrentCar
             ref={carRef}
-            startPosition={currentLevel === 1 ? [10, 2.5, -7] : [-12, 2.5, -16]}
+            startPosition={currentLevel === 1 ? [16, -3, -4] : [-13, 2.5, -16]}
+            
             // flip the car for level 2
-            startRotation={currentLevel === 2 ? [0, Math.PI, 0] : [0, 0, 0]}
-            onHudUpdate={setHudData}
+            startRotation={currentLevel === 2 ? [0, -Math.PI, 0] : [0, Math.PI/2, 0]}
+            onHudUpdate={handleHudUpdate} // Use the updated handler
           />
 
           <CarSound speed={hudData.speed} gear={hudData.gear} />
@@ -243,18 +349,293 @@ const CurrentCar = carComponents[selectedCar]
         <Countdown onComplete={handleCountdownComplete} />
       )}
 
-      {/* HUD */}
+      // Add this with your other overlays (after Countdown, before HUD)
+{gameFailed && (
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 2000,
+      color: 'white',
+      fontFamily: 'Arial, sans-serif',
+    }}
+  >
+    <div
+      style={{
+        fontSize: '48px',
+        fontWeight: 'bold',
+        color: '#ff4444',
+        marginBottom: '20px',
+        textShadow: '0 0 10px rgba(255, 0, 0, 0.5)',
+      }}
+    >
+      LEVEL FAILED!
+    </div>
+    
+    <div
+      style={{
+        fontSize: '24px',
+        marginBottom: '30px',
+        color: '#ffffff',
+        textAlign: 'center',
+      }}
+    >
+      Time ran out at Checkpoint {failedCheckpoint}
+    </div>
+    
+    <div
+      style={{
+        display: 'flex',
+        gap: '20px',
+      }}
+    >
+      <button
+        onClick={handleRestartGame}
+        style={{
+          padding: '15px 30px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          backgroundColor: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#45a049';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#4CAF50';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        🔄 Restart Level
+      </button>
+      
+      <button
+        onClick={handleBackToMenuFromFailure}
+        style={{
+          padding: '15px 30px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          backgroundColor: '#f44336',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#da190b';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#f44336';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        🏠 Back to Menu
+      </button>
+    </div>
+    
+    <div
+      style={{
+        marginTop: '30px',
+        fontSize: '16px',
+        color: '#cccccc',
+        textAlign: 'center',
+        maxWidth: '400px',
+      }}
+    >
+      Tip: Use boost from checkpoints to maintain speed and beat the timer!
+    </div>
+  </div>
+)}
+
+      // Add this with your other overlays (after Level Failed overlay)
+{gameWon && (
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 2000,
+      color: 'white',
+      fontFamily: 'Arial, sans-serif',
+    }}
+  >
+    <div
+      style={{
+        fontSize: '72px',
+        fontWeight: 'bold',
+        color: '#4CAF50',
+        marginBottom: '20px',
+        textShadow: '0 0 20px rgba(76, 175, 80, 0.7)',
+        animation: 'celebrate 2s infinite alternate',
+      }}
+    >
+      🏆 YOU WIN! 🏆
+    </div>
+    
+    <div
+      style={{
+        fontSize: '32px',
+        marginBottom: '10px',
+        color: '#ffffff',
+        textAlign: 'center',
+      }}
+    >
+      Track {completedTrack} Completed!
+    </div>
+    
+    <div
+      style={{
+        fontSize: '20px',
+        marginBottom: '40px',
+        color: '#cccccc',
+        textAlign: 'center',
+      }}
+    >
+      All 3 checkpoints reached successfully!
+    </div>
+    
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px',
+        alignItems: 'center',
+      }}
+    >
+      <button
+        onClick={handleSwitchTrack}
+        style={{
+          padding: '18px 35px',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          backgroundColor: '#2196F3',
+          color: 'white',
+          border: 'none',
+          borderRadius: '10px',
+          cursor: 'pointer',
+          boxShadow: '0 6px 12px rgba(0,0,0,0.3)',
+          transition: 'all 0.3s ease',
+          minWidth: '250px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#1976D2';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#2196F3';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        🎯 Play Track {currentLevel === 1 ? 2 : 1}
+      </button>
+      
+      <button
+        onClick={handleRestartSameTrack}
+        style={{
+          padding: '15px 30px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          backgroundColor: '#FF9800',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          transition: 'all 0.3s ease',
+          minWidth: '250px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#F57C00';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#FF9800';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        🔄 Play Again
+      </button>
+      
+      <button
+        onClick={onBackToMenu}
+        style={{
+          padding: '15px 30px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          backgroundColor: '#9C27B0',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          transition: 'all 0.3s ease',
+          minWidth: '250px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#7B1FA2';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#9C27B0';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        🏠 Back to Menu
+      </button>
+    </div>
+    
+    <div
+      style={{
+        marginTop: '40px',
+        fontSize: '16px',
+        color: '#888888',
+        textAlign: 'center',
+        maxWidth: '400px',
+      }}
+    >
+      Completed with {selectedCar.toUpperCase()} - Great driving!
+    </div>
+  </div>
+)}
+
+      {/* HUD - Update to pass boostActive */}
       {isFirstPerson ? (
         <FirstPersonHUD 
           speed={hudData.speed} 
           gear={hudData.gear} 
           currentCheckpoint={currentCheckpoint}
+          boostActive={hudData.boostActive || boostActive}
         />
       ) : (
         <HUDOverlay 
           speed={hudData.speed} 
           gear={hudData.gear} 
           currentCheckpoint={currentCheckpoint}
+          boostActive={hudData.boostActive || boostActive}
         />
       )}
 
@@ -265,6 +646,23 @@ const CurrentCar = carComponents[selectedCar]
           isActive={gameStarted && activeCheckpoint !== null}
           onTimeout={handleCheckpointTimeout}
           duration={10} // 10 seconds per checkpoint
+        />
+      )}
+
+      {/* Boost Visual Effect Overlay */}
+      {boostActive && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%)',
+            pointerEvents: 'none',
+            zIndex: 999,
+            animation: 'pulse 0.5s infinite alternate',
+          }}
         />
       )}
 
@@ -363,6 +761,16 @@ const CurrentCar = carComponents[selectedCar]
           Get Ready!
         </div>
       )}
+
+      {/* Add CSS animation for boost effect */}
+      <style>
+        {`
+          @keyframes pulse {
+            from { opacity: 0.3; }
+            to { opacity: 0.1; }
+          }
+        `}
+      </style>
     </div>
   )
 }

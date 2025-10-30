@@ -8,21 +8,30 @@ import {
   useRef,
   useImperativeHandle,
   useState,
+  useCallback,
 } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
 import { useGLTF } from '@react-three/drei'
 
+// Define the car handle interface for boost functionality
+interface CarHandle {
+  activateBoost: (multiplier?: number, duration?: number) => void
+  getSpeed: () => number
+  getBoostActive: () => boolean
+}
+
 interface CarProps {
-  onHudUpdate?: (data: { speed: number; gear: string }) => void
+  onHudUpdate?: (data: { speed: number; gear: string; boostActive?: boolean }) => void
   startPosition?: [number, number, number]
+  disabled?: boolean // Add disabled prop
   startRotation?: [number, number, number]
 }
 
-const Car = forwardRef<Mesh, CarProps>(
+const Car = forwardRef<Mesh & CarHandle, CarProps>(
   ({ onHudUpdate, startPosition = [9, 9, -7], startRotation = [0, 0, 0]}, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1500, 
-            position: [startPosition[0], 0.5, startPosition[2]],
+      position: [startPosition[0], 0.5, startPosition[2]],
       rotation: startRotation,
       args: [1.8, 0.5, 4.6], // Better match BMW M3 dimensions
       linearDamping: 0.7,    // Increased for less sliding
@@ -35,10 +44,9 @@ const Car = forwardRef<Mesh, CarProps>(
       linearFactor: [1, 0, 1],
     }))
 
-    useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
-
     const [speed, setSpeed] = useState(0)
     const [gear, setGear] = useState('N')
+    const [boostActive, setBoostActive] = useState(false) // Boost state
 
     const keys = useKeyboard()
 
@@ -48,6 +56,28 @@ const Car = forwardRef<Mesh, CarProps>(
     const currentSpeed = useRef(0)
     const targetSpeed = useRef(0)
     const isReversing = useRef(false)
+    const boostMultiplier = useRef(1) // Boost multiplier
+    const boostTimeRemaining = useRef(0) // Boost duration timer
+
+    // Boost activation function
+    const activateBoost = useCallback((multiplier: number = 1.5, duration: number = 2) => {
+      boostMultiplier.current = multiplier
+      boostTimeRemaining.current = duration
+      setBoostActive(true)
+      
+      // Update HUD with boost status
+      onHudUpdate?.({ speed, gear, boostActive: true })
+    }, [speed, gear, onHudUpdate])
+
+    // Proper useImperativeHandle implementation
+    useImperativeHandle(ref, () => {
+      const mesh = physicsRef.current!
+      return Object.assign(mesh, {
+        activateBoost,
+        getSpeed: () => speed,
+        getBoostActive: () => boostActive,
+      })
+    }, [physicsRef, speed, boostActive, activateBoost])
 
     useEffect(() => {
       const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
@@ -58,21 +88,37 @@ const Car = forwardRef<Mesh, CarProps>(
       }
     }, [api])
 
+    // Boost timer management
+    useFrame((_, delta) => {
+      if (boostTimeRemaining.current > 0) {
+        boostTimeRemaining.current -= delta
+        
+        if (boostTimeRemaining.current <= 0) {
+          boostTimeRemaining.current = 0
+          boostMultiplier.current = 1
+          setBoostActive(false)
+          onHudUpdate?.({ speed, gear, boostActive: false })
+        }
+      }
+    })
+
     // Add velocity limiting to prevent extreme speeds
     useEffect(() => {
-      // Limit maximum velocity to prevent extreme speeds
       const interval = setInterval(() => {
         const [vx, vy, vz] = velocity.current
         const currentSpeed = Math.sqrt(vx*vx + vz*vz)
         
-        if (currentSpeed > 25) { // Cap maximum speed
-          const factor = 25 / currentSpeed
+        // Adjust max speed based on boost
+        const effectiveMaxSpeed = boostActive ? 25 * boostMultiplier.current : 25
+        
+        if (currentSpeed > effectiveMaxSpeed) {
+          const factor = effectiveMaxSpeed / currentSpeed
           api.velocity.set(vx * factor, vy, vz * factor)
         }
       }, 100)
       
       return () => clearInterval(interval)
-    }, [api])
+    }, [api, boostActive])
 
     useFrame((_, delta) => {
       if (!physicsRef.current) return
@@ -92,13 +138,15 @@ const Car = forwardRef<Mesh, CarProps>(
         isReversing.current = true
       } else {
         targetSpeed.current = 0
-        // Don't reset isReversing here - we want to maintain the state until we start moving forward
       }
 
+      // Apply boost multiplier to acceleration
+      const effectiveAcceleration = boostActive ? acceleration * boostMultiplier.current : acceleration
+      
       // Smooth acceleration/deceleration with delta time
       const speedDiff = targetSpeed.current - currentSpeed.current
       const accelerationRate = Math.abs(speedDiff) > 0.1 ? 
-        (speedDiff > 0 ? acceleration : deceleration) : deceleration
+        (speedDiff > 0 ? effectiveAcceleration : deceleration) : deceleration
       
       currentSpeed.current += speedDiff * accelerationRate * delta
       currentSpeed.current = Math.max(-maxSpeed, Math.min(maxReverseSpeed, currentSpeed.current))
@@ -164,18 +212,18 @@ const Car = forwardRef<Mesh, CarProps>(
       } else if (isReversing.current) {
         currentGear = 'R'
       } else {
-        // Forward gears
+        // Forward gears - adjusted for BMW performance
         if (speedKmh < 30) currentGear = '1'
         else if (speedKmh < 60) currentGear = '2'
         else if (speedKmh < 90) currentGear = '3'
         else currentGear = '4'
       }
 
-      // Update state and parent
+      // Update state and parent with boost status
       if (Math.abs(speedKmh - speed) > 0.5 || currentGear !== gear) {
         setSpeed(speedKmh)
         setGear(currentGear)
-        onHudUpdate?.({ speed: speedKmh, gear: currentGear })
+        onHudUpdate?.({ speed: speedKmh, gear: currentGear, boostActive })
       }
     })
 
@@ -183,14 +231,15 @@ const Car = forwardRef<Mesh, CarProps>(
 
     return (
       <mesh ref={physicsRef} castShadow>
-       <group position={[0.7, 0, 0]}>
-    <primitive object={scene} scale={0.4} />
-  </group>
-   <ExhaustParticles 
-            carSpeed={speed} 
-            isReversing={isReversing.current}
-            position={[0.6, 0, 0]} // Adjust this for your first car
-          />
+        <group position={[-0.2, 0, 0]}>
+          <primitive object={scene} scale={0.4} />
+        </group>
+        <ExhaustParticles 
+          carSpeed={speed} 
+          isReversing={isReversing.current}
+          isBoosting={boostActive} // Pass boost state to particles
+          position={[0.6, 0, 0]}
+        />
       </mesh>
     )
   }

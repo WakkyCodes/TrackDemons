@@ -98,7 +98,6 @@ export default function Track02({ onCheckpoint, activeCheckpoint }: Track02Props
 
     return () => clearInterval(interval)
   }, [mixer])
-
   // Define your wall boxes here
   const wallBoxes: { 
     position: [number, number, number]; 
@@ -159,21 +158,21 @@ const curvedWall1 = createCurvedWall(
         position={[7, 0.5, -7.2]} 
         rotation={[0, Math.PI/2, 0]}
         checkpointNumber={3}
-        onCheckpoint={activeCheckpoint === 3 ? onCheckpoint : undefined}
+        onCheckpoint={onCheckpoint}
       />
       
       <Checkpoint 
         position={[17.39, 0.5, -22.5]} 
         rotation={[0, Math.PI , 0]}
         checkpointNumber={2}
-        onCheckpoint={activeCheckpoint === 2 ? onCheckpoint : undefined}
+        onCheckpoint={onCheckpoint}
       />
       
       <Checkpoint 
         position={[-3.5, 0.5, -53.5]} 
         rotation={[0, -Math.PI / 2, 0]}
         checkpointNumber={1}
-        onCheckpoint={activeCheckpoint === 1 ? onCheckpoint : undefined}
+        onCheckpoint={onCheckpoint}
       />
     </group>
   )
