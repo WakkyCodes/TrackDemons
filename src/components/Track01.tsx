@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import ColliderBox from './ColliderBox'
 import ColliderWall from './ColliderWall';
 import Ramp from './Ramp'
-import { Mesh, BufferGeometry, Texture } from 'three'
+import {BufferGeometry, Texture } from 'three'
 import * as THREE from 'three';
 import { CoveredCar } from './CoveredCar'
 import Checkpoint from './Checkpoint'
