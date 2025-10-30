@@ -239,12 +239,13 @@ useImperativeHandle(ref, () => {
       }
     })
 
-    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car22.glb`)
 
     return (
       <mesh ref={physicsRef} castShadow>
-        <group position={[-2.5, 0, 0]}>
-          <primitive object={scene} scale={0.006} />
+        <group position={[-0.54, 0, 0]}>
+          {/*<primitive object={scene} scale={0.006} />*/}
+          <primitive object={scene} scale={35} />
         </group>
         <ExhaustParticles 
           carSpeed={speed} 
