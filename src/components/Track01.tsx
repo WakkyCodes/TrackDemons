@@ -1,8 +1,7 @@
 // Track01.tsx
 import { useGLTF } from '@react-three/drei';
-import ColliderBox from './ColliderBox';
 import Ramp from './Ramp';
-import { CoveredCar } from './CoveredCar'; 
+
 import Checkpoint from './Checkpoint';
 
 interface Track01Props {
@@ -18,15 +17,16 @@ export default function Track01({ onCheckpoint }: Track01Props) {
       <primitive object={scene} />
 
       {/* All the invisible walls (ColliderBoxes) go here */}
-      <ColliderBox position={[-2.8, 0, 9.55]} rotation={[0, Math.PI / 4, 0]} />
-      <ColliderBox position={[-4.15, 0, 11.9]} rotation={[0, Math.PI / 3, 0]} />
-      {/* ... add all the other ColliderBox instances from the example ... */}
+      
+      {/* <ColliderBox position={[-2.8, 0, 9.55]} rotation={[0, Math.PI / 4, 0]} />
+      <ColliderBox position={[-4.15, 0, 11.9]} rotation={[0, Math.PI / 3, 0]} /> */}
 
       {/* This renders the ramp, both visibly and with its own physics */}
       <Ramp />
       
-      {/* Covered car */}
-      <CoveredCar position={[7.9, 0, -3]} />
+      {/* Covered car 
+       <CoveredCar position={[7.9, 0, -3]} />*/}
+     
 
       {/* CHECKPOINTS - All checkpoints are always visible and functional */}
       <Checkpoint 

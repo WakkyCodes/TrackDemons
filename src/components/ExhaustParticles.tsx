@@ -5,6 +5,7 @@ import { Points, BufferGeometry, BufferAttribute } from 'three'
 interface ExhaustParticlesProps {
   carSpeed: number
   isReversing: boolean
+   isBoosting?: boolean
   position?: [number, number, number]
 }
 
