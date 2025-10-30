@@ -39,7 +39,7 @@ interface Track02Props {
   activeCheckpoint?: number | null
 }
 
-export default function Track02({ onCheckpoint, activeCheckpoint }: Track02Props) {
+export default function Track02({ onCheckpoint }: Track02Props) {
   const group = useRef<Group>(null)
   const { scene, animations } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`)
   const { actions, mixer } = useAnimations(animations, group)
