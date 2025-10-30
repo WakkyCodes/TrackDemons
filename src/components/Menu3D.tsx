@@ -81,6 +81,19 @@ export default function Menu3D({
     }
   };
 
+  const getDifficultyColor = (diff: Difficulty) => {
+    if (diff === difficulty) return '#4CAF50';
+    return '#555';
+  };
+
+  const getDifficultyDescription = () => {
+    switch(difficulty) {
+      case 'easy': return 'No time limits, explore freely!';
+      case 'normal': return 'Standard checkpoint timers';
+      case 'hard': return 'Shorter time limits, more challenge!';
+    }
+  };
+
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas shadows camera={{ position: [-1, 2, -3], fov: 80 }}>
