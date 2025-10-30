@@ -6,11 +6,15 @@ import MenuMusic from "./MenuSound";
 import { Settings } from "lucide-react"; // ⚙️ icon
 
 type CarModel = "car" | "bmw";
+type Difficulty = 'easy' | 'normal' | 'hard';
+
 
 type Menu3DProps = {
   onSelectTrack: (track: number) => void;
   selectedCar: CarModel;
   onCarChange: (car: CarModel) => void;
+  difficulty: Difficulty;
+  onDifficultyChange: (diff: Difficulty) => void;
   isInMenu?: boolean;
 };
 
@@ -57,9 +61,24 @@ export default function Menu3D({
   onSelectTrack,
   selectedCar,
   onCarChange,
+  difficulty,
+  onDifficultyChange,
   isInMenu,
 }: Menu3DProps) {
   const [showSettings, setShowSettings] = useState(false);
+
+  const getDifficultyColor = (diff: Difficulty) => {
+    if (diff === difficulty) return '#4CAF50';
+    return '#555';
+  };
+
+  const getDifficultyDescription = () => {
+    switch(difficulty) {
+      case 'easy': return 'No time limits, explore freely!';
+      case 'normal': return 'Standard checkpoint timers';
+      case 'hard': return 'Shorter time limits, more challenge!';
+    }
+  };
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
@@ -106,41 +125,217 @@ export default function Menu3D({
 
       {/* ⚙️ Settings Menu Dropdown */}
       {showSettings && (
-        <div
-          style={{
-            position: "absolute",
-            top: "70px",
-            right: "20px",
-            background: "rgba(0, 0, 0, 0.8)",
-            borderRadius: "10px",
-            padding: "15px 20px",
-            color: "white",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-            minWidth: "180px",
-            zIndex: 10,
-          }}
-        >
-          <div
-            style={{ marginBottom: "10px", cursor: "pointer" }}
-            onClick={() => alert("🎵 Choose Sound clicked")}
-          >
-            🎵 Choose Sound
-          </div>
-          <div
-            style={{ marginBottom: "10px", cursor: "pointer" }}
-            onClick={() => alert("⚙️ Difficulty clicked")}
-          >
-            ⚙️ Difficulty
-          </div>
-          <div
-            style={{ cursor: "pointer" }}
-            onClick={() => alert("❓ Help clicked")}
-          >
-            ❓ Help
-          </div>
-        </div>
-      )}
 
+        <div
+
+          style={{
+
+            position: "absolute",
+
+            top: "70px",
+
+            right: "20px",
+
+            background: "rgba(0, 0, 0, 0.8)",
+
+            borderRadius: "10px",
+
+            padding: "15px 20px",
+
+            color: "white",
+
+            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+
+            minWidth: "180px",
+
+            zIndex: 10,
+
+          }}
+
+        >
+
+          <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', borderBottom: '2px solid #4CAF50', paddingBottom: '10px' }}>
+
+            ⚙️ Settings
+
+          </h3>
+
+          
+
+          {/* Difficulty Selection */}
+
+          <div style={{ marginBottom: '20px' }}>
+
+            <div style={{ fontSize: '14px', marginBottom: '10px', color: '#aaa' }}>
+
+              Difficulty
+
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+              <button
+
+                onClick={() => onDifficultyChange('easy')}
+
+                style={{
+
+                  padding: '10px 15px',
+
+                  backgroundColor: getDifficultyColor('easy'),
+
+                  border: difficulty === 'easy' ? '2px solid #4CAF50' : '2px solid transparent',
+
+                  borderRadius: '5px',
+
+                  color: 'white',
+
+                  cursor: 'pointer',
+
+                  fontSize: '14px',
+
+                  fontWeight: 'bold',
+
+                  transition: 'all 0.2s',
+
+                }}
+
+              >
+
+                😊 Easy
+
+              </button>
+
+              <button
+
+                onClick={() => onDifficultyChange('normal')}
+
+                style={{
+
+                  padding: '10px 15px',
+
+                  backgroundColor: getDifficultyColor('normal'),
+
+                  border: difficulty === 'normal' ? '2px solid #4CAF50' : '2px solid transparent',
+
+                  borderRadius: '5px',
+
+                  color: 'white',
+
+                  cursor: 'pointer',
+
+                  fontSize: '14px',
+
+                  fontWeight: 'bold',
+
+                  transition: 'all 0.2s',
+
+                }}
+
+              >
+
+                😐 Normal
+
+              </button>
+
+              <button
+
+                onClick={() => onDifficultyChange('hard')}
+
+                style={{
+
+                  padding: '10px 15px',
+
+                  backgroundColor: getDifficultyColor('hard'),
+
+                  border: difficulty === 'hard' ? '2px solid #4CAF50' : '2px solid transparent',
+
+                  borderRadius: '5px',
+
+                  color: 'white',
+
+                  cursor: 'pointer',
+
+                  fontSize: '14px',
+
+                  fontWeight: 'bold',
+
+                  transition: 'all 0.2s',
+
+                }}
+
+              >
+
+                😈 Hard
+
+              </button>
+
+            </div>
+
+            <div style={{ fontSize: '12px', marginTop: '10px', color: '#888', fontStyle: 'italic' }}>
+
+              {getDifficultyDescription()}
+
+            </div>
+
+          </div>
+
+
+
+          {/* Other Options */}
+
+          <div
+
+            style={{ marginBottom: "10px", cursor: "pointer", padding: '8px', borderRadius: '5px' }}
+
+            onClick={() => alert("🎵 Choose Sound clicked")}
+
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+
+          >
+
+            🎵 Choose Sound
+
+          </div>
+
+          <div
+
+            style={{ cursor: "pointer", padding: '8px', borderRadius: '5px' }}
+
+            onClick={() => alert("❓ Help clicked")}
+
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+
+          >
+
+            ❓ Help
+
+          </div>
+
+        </div>
+
+      )}
+      {/* Difficulty Indicator */}
+      <div
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          background: "rgba(0, 0, 0, 0.7)",
+          padding: "10px 20px",
+          borderRadius: "8px",
+          color: "white",
+          fontSize: "14px",
+          fontWeight: "bold",
+        }}
+      >
+        Difficulty: <span style={{ color: '#4CAF50' }}>{difficulty.toUpperCase()}</span>
+      </div>
+      
       {/* Car Selection UI */}
       <div
         style={{
