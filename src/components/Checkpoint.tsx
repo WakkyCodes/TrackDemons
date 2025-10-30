@@ -8,13 +8,15 @@ interface CheckpointProps {
   rotation?: [number, number, number];
   checkpointNumber: number;
   onCheckpoint?: (checkpointNumber: number) => void;
+  visible?: boolean;
 }
 
 export default function SimpleCheckpoint({ 
   position, 
   rotation = [0, 0, 0], 
   checkpointNumber,
-  onCheckpoint 
+  onCheckpoint,
+  visible = true  
 }: CheckpointProps) {
   const [triggered, setTriggered] = useState(false);
   const [ref] = useBox<Mesh>(() => ({
@@ -35,6 +37,9 @@ export default function SimpleCheckpoint({
       }
     },
   }));
+    if (!visible) {
+      return <mesh ref={ref} visible={false} />;
+    }
 
   return (
     <group>

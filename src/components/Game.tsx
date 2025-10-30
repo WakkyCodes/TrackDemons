@@ -21,19 +21,27 @@ import CarSound from './CarSound'
 import CheckpointCountdown from './CheckpointCountdown'
 import useKeyboard from '../hooks/useKeyboard'
 
-type CarModel = 'car' | 'bmw'  
+type CarModel = 'car' | 'bmw' 
+type Difficulty = 'easy' | 'normal' | 'hard' 
 
 type GameProps = {
   track: number
   selectedCar: CarModel 
+  difficulty: Difficulty
   onBackToMenu: () => void
 }
 const carComponents = {
   car: Car,
   bmw: BMW,
 }
-
-export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
+const getCheckpointDuration = (difficulty: Difficulty) => {
+  switch(difficulty) {
+    case 'easy': return 999999; // Essentially infinite
+    case 'normal': return 10;
+    case 'hard': return 7;
+  }
+}
+export default function Game({ track, selectedCar, difficulty, onBackToMenu }: GameProps) {
   const carRef = useRef<Mesh>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
   const [hudData, setHudData] = useState({ speed: 0, gear: 'N' })
@@ -210,6 +218,7 @@ const CurrentCar = carComponents[selectedCar]
     // Force re-render of physics and car by changing key
     setKey(prev => prev + 1);
   };
+   const showCheckpoints = difficulty !== 'easy';
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -224,6 +233,7 @@ const CurrentCar = carComponents[selectedCar]
             <Track01 
               key="track01" 
               onCheckpoint={handleCheckpoint}
+              showCheckpoints={showCheckpoints}
             />
           )}
           {currentLevel === 2 && (
@@ -231,6 +241,7 @@ const CurrentCar = carComponents[selectedCar]
               key="track02" 
               onCheckpoint={handleCheckpoint}
               activeCheckpoint={activeCheckpoint}
+              showCheckpoints={showCheckpoints}
             />
           )}
 
@@ -273,12 +284,12 @@ const CurrentCar = carComponents[selectedCar]
       )}
 
       {/* Checkpoint Countdown for both tracks - Only show when game is active */}
-      {activeCheckpoint && gameStarted && !gameOver && (
+      {showCheckpoints && activeCheckpoint && gameStarted && !gameOver && (
         <CheckpointCountdown
           checkpointNumber={activeCheckpoint}
           isActive={gameStarted && activeCheckpoint !== null}
           onTimeout={handleCheckpointTimeout}
-          duration={10} // 10 seconds per checkpoint
+          duration={getCheckpointDuration(difficulty)} // 10 seconds per checkpoint
         />
       )}
 

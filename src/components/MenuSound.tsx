@@ -1,56 +1,41 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from "react";
 
 const TRACKLIST = [
-  '/TrackDemons/sounds/track1.mp3',
-  '/TrackDemons/music/track2.mp3',
-  '/TrackDemons/music/track3.mp3',
-]
+  "/TrackDemons/sounds/track1.mp3",
+  "/TrackDemons/music/track2.mp3",
+  "/TrackDemons/music/track3.mp3",
+];
 
-const MenuMusic: React.FC = () => {
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
-  const [hasInteracted, setHasInteracted] = useState(false)
+type MenuMusicProps = {
+  isPlaying: boolean;
+};
 
-  useEffect(() => {
-    const audio = new Audio(TRACKLIST[currentTrackIndex])
-    audio.loop = false
-    audio.volume = 0.4
-    audioRef.current = audio
-
-    const handleEnded = () => {
-      const nextIndex = (currentTrackIndex + 1) % TRACKLIST.length
-      setCurrentTrackIndex(nextIndex)
-    }
-
-    audio.addEventListener('ended', handleEnded)
-    return () => {
-      audio.pause()
-      audio.removeEventListener('ended', handleEnded)
-    }
-  }, [currentTrackIndex])
+const MenuMusic: React.FC<MenuMusicProps> = ({ isPlaying }) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const handleUserInteraction = () => {
-      const audio = audioRef.current
-      if (audio && !hasInteracted) {
-        audio.play().then(() => {
-          setHasInteracted(true)
-          window.removeEventListener('click', handleUserInteraction)
-          window.removeEventListener('keydown', handleUserInteraction)
-        }).catch(err => console.warn('Menu music play failed:', err))
-      }
+    if (!audioRef.current) {
+      const randomTrack = Math.floor(Math.random() * TRACKLIST.length);
+      const audio = new Audio(TRACKLIST[randomTrack]);
+      audio.loop = true; // Loop background music
+      audio.volume = 0.4;
+      audioRef.current = audio;
     }
 
-    window.addEventListener('click', handleUserInteraction)
-    window.addEventListener('keydown', handleUserInteraction)
+    const audio = audioRef.current;
+
+    if (isPlaying) {
+      audio.play().catch((err) => console.warn("Play failed:", err));
+    } else {
+      audio.pause();
+    }
 
     return () => {
-      window.removeEventListener('click', handleUserInteraction)
-      window.removeEventListener('keydown', handleUserInteraction)
-    }
-  }, [hasInteracted])
+      audio.pause();
+    };
+  }, [isPlaying]);
 
-  return null
-}
+  return null;
+};
 
-export default MenuMusic
+export default MenuMusic;

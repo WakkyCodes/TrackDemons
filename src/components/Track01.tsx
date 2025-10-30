@@ -7,9 +7,10 @@ import Checkpoint from './Checkpoint';
 
 interface Track01Props {
   onCheckpoint?: (checkpointNumber: number) => void;
+  showCheckpoints?: boolean; 
 }
 
-export default function Track01({ onCheckpoint }: Track01Props) {
+export default function Track01({ onCheckpoint , showCheckpoints = true }: Track01Props) {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track01.glb`);
 
   return (
@@ -34,6 +35,7 @@ export default function Track01({ onCheckpoint }: Track01Props) {
         rotation={[0, Math.PI / 17, 0]}
         checkpointNumber={1}
         onCheckpoint={onCheckpoint}
+        visible={showCheckpoints}
       />
       
       <Checkpoint 
@@ -41,6 +43,7 @@ export default function Track01({ onCheckpoint }: Track01Props) {
         rotation={[0, Math.PI / 1.47, 0]}
         checkpointNumber={2}
         onCheckpoint={onCheckpoint}
+        visible={showCheckpoints}
       />
       
       <Checkpoint 
@@ -48,6 +51,7 @@ export default function Track01({ onCheckpoint }: Track01Props) {
         rotation={[0, -Math.PI / 2, 0]}
         checkpointNumber={3}
         onCheckpoint={onCheckpoint}
+        visible={showCheckpoints}
       />
     </>
   );

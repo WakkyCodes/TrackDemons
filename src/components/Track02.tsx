@@ -35,9 +35,10 @@ const createCurvedWall = (
 interface Track02Props {
   onCheckpoint?: (checkpointNumber: number) => void
   activeCheckpoint?: number | null
+  showCheckpoints?: boolean; 
 }
 
-export default function Track02({ onCheckpoint, activeCheckpoint }: Track02Props) {
+export default function Track02({ onCheckpoint, activeCheckpoint, showCheckpoints = true }: Track02Props) {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`)
 
   // Define your wall boxes here
@@ -101,6 +102,7 @@ const curvedWall1 = createCurvedWall(
         rotation={[0, Math.PI/2, 0]}
         checkpointNumber={3}
         onCheckpoint={activeCheckpoint === 3 ? onCheckpoint : undefined}
+        visible={showCheckpoints}
       />
       
       <Checkpoint 
@@ -108,6 +110,7 @@ const curvedWall1 = createCurvedWall(
         rotation={[0, Math.PI , 0]}
         checkpointNumber={2}
         onCheckpoint={activeCheckpoint === 2 ? onCheckpoint : undefined}
+        visible={showCheckpoints}
       />
       
       <Checkpoint 
@@ -115,6 +118,7 @@ const curvedWall1 = createCurvedWall(
         rotation={[0, -Math.PI / 2, 0]}
         checkpointNumber={1}
         onCheckpoint={activeCheckpoint === 1 ? onCheckpoint : undefined}
+        visible={showCheckpoints}
       />
     </>
   )
