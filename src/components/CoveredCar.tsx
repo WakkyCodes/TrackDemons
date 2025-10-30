@@ -10,16 +10,18 @@ type CoveredCarProps = {
 };
 
 export function CoveredCar({ position, rotation = [0, 0, 0] }: CoveredCarProps) {
-  // Update this path to point to the .gltf file inside its new folder
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/covered_car/covered_car_4k.gltf`);
+  const { scene } = useGLTF(
+    `${import.meta.env.BASE_URL}models/covered_car/covered_car_4k.gltf`
+  );
 
+  // Dynamic physics body (movable)
   const [ref] = useBox<Mesh>(() => ({
-    mass: 1,
-    type: 'Static',
+    mass: 1, // >0 makes it dynamic
     position,
     rotation,
-    args: [2.2, 1.5, 5], 
+    args: [2.2, 1.5, 5], // approximate size of the car hitbox
+    allowSleep: false,   // keeps it always active
   }));
 
-  return <primitive object={scene.clone()} ref={ref} />;
+  return <primitive ref={ref} object={scene.clone()} />;
 }
