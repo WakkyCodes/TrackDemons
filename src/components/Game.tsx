@@ -328,10 +328,10 @@ const handleRestartSameTrack = () => {
 
           <CurrentCar
             ref={carRef}
-            startPosition={currentLevel === 1 ? [16, -3, -4] : [-12, 2.5, -16]}
+            startPosition={currentLevel === 1 ? [16, -3, -4] : [-13, 2.5, -16]}
             
             // flip the car for level 2
-            startRotation={currentLevel === 2 ? [0, Math.PI/2, 0] : [0, Math.PI/2, 0]}
+            startRotation={currentLevel === 2 ? [0, -Math.PI, 0] : [0, Math.PI/2, 0]}
             onHudUpdate={handleHudUpdate} // Use the updated handler
           />
 
