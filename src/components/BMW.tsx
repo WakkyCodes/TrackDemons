@@ -231,7 +231,7 @@ const Car = forwardRef<Mesh & CarHandle, CarProps>(
 
     return (
       <mesh ref={physicsRef} castShadow>
-        <group position={[0.7, 0, 0]}>
+        <group position={[-0.2, 0, 0]}>
           <primitive object={scene} scale={0.4} />
         </group>
         <ExhaustParticles 
