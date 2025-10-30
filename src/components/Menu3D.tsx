@@ -62,8 +62,7 @@ export default function Menu3D({
   selectedCar,
   onCarChange,
   difficulty,
-  onDifficultyChange,
-  isInMenu,
+  onDifficultyChange
 }: Menu3DProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [isSoundOn, setIsSoundOn] = useState(false);
@@ -81,18 +80,9 @@ export default function Menu3D({
     }
   };
 
-  const getDifficultyColor = (diff: Difficulty) => {
-    if (diff === difficulty) return '#4CAF50';
-    return '#555';
-  };
 
-  const getDifficultyDescription = () => {
-    switch(difficulty) {
-      case 'easy': return 'No time limits, explore freely!';
-      case 'normal': return 'Standard checkpoint timers';
-      case 'hard': return 'Shorter time limits, more challenge!';
-    }
-  };
+
+
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
