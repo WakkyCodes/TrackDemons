@@ -712,7 +712,7 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
           isActive={gameStarted && activeCheckpoint !== null}
           onTimeout={handleCheckpointTimeout}
           duration={10} // 10 seconds per checkpoint
-          totalCheckpoints={currentLevel === 1 ? 3 : 5}
+
         />
       )}
 
