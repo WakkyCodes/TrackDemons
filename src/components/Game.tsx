@@ -33,6 +33,7 @@ interface CarHandle {
   activateBoost: (multiplier?: number, duration?: number) => void
   getSpeed: () => number
   getBoostActive: () => boolean
+  setControlsEnabled: (enabled: boolean) => void // Add this method
 }
 
 const carComponents = {
@@ -66,11 +67,24 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
   const keys = useKeyboard()
   const CurrentCar = carComponents[selectedCar]
 
+  // Control car controls based on game state
+  useEffect(() => {
+    if (carRef.current && carRef.current.setControlsEnabled) {
+      // Only enable controls when game is started AND countdown is not showing
+      const shouldEnableControls = gameStarted && !showCountdown;
+      carRef.current.setControlsEnabled(shouldEnableControls);
+    }
+  }, [gameStarted, showCountdown]);
+
   // Reset car ref when switching tracks
   useEffect(() => {
     if (carRef.current) {
       // Reset boost state when switching tracks
       setBoostActive(false)
+      // Ensure controls are disabled when switching tracks
+      if (carRef.current.setControlsEnabled) {
+        carRef.current.setControlsEnabled(false);
+      }
     }
   }, [currentLevel])
   
@@ -84,12 +98,20 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
   const handleControlsClose = () => {
     setShowControls(false)
     setShowCountdown(true)
+    // Ensure controls are disabled during countdown
+    if (carRef.current && carRef.current.setControlsEnabled) {
+      carRef.current.setControlsEnabled(false);
+    }
   }
 
   // Handle countdown completion
   const handleCountdownComplete = () => {
     setShowCountdown(false)
     setGameStarted(true)
+    // Enable car controls when countdown completes
+    if (carRef.current && carRef.current.setControlsEnabled) {
+      carRef.current.setControlsEnabled(true);
+    }
   }
 
   // Handle checkpoint timeout - UPDATED FOR BOTH TRACKS
@@ -98,6 +120,11 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
     setGameFailed(true);
     setFailedCheckpoint(checkpointNumber);
     setGameStarted(false); // Stop the game
+    
+    // Disable car controls when game fails
+    if (carRef.current && carRef.current.setControlsEnabled) {
+      carRef.current.setControlsEnabled(false);
+    }
   };
 
   const handleRestartGame = () => {
@@ -114,6 +141,13 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
     
     // Force re-render of physics and car
     setKey(prev => prev + 1);
+    
+    // Ensure controls are disabled
+    setTimeout(() => {
+      if (carRef.current && carRef.current.setControlsEnabled) {
+        carRef.current.setControlsEnabled(false);
+      }
+    }, 100);
     
     console.log('Game restarted from beginning');
   };
@@ -168,6 +202,11 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
       setCompletedTrack(currentLevel);
       setGameStarted(false);
       setActiveCheckpoint(null);
+      
+      // Disable car controls when game is won
+      if (carRef.current && carRef.current.setControlsEnabled) {
+        carRef.current.setControlsEnabled(false);
+      }
     }
   }, [checkpoints, gameStarted, gameWon, currentLevel]);
 
@@ -203,6 +242,13 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
     // Force re-render of physics and car by changing key
     setKey(prev => prev + 1)
     
+    // Ensure controls are disabled
+    setTimeout(() => {
+      if (carRef.current && carRef.current.setControlsEnabled) {
+        carRef.current.setControlsEnabled(false);
+      }
+    }, 100);
+    
     // Start countdown automatically after track change
     setTimeout(() => {
       setShowCountdown(true)
@@ -228,6 +274,13 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
     // Force re-render
     setKey(prev => prev + 1);
     
+    // Ensure controls are disabled
+    setTimeout(() => {
+      if (carRef.current && carRef.current.setControlsEnabled) {
+        carRef.current.setControlsEnabled(false);
+      }
+    }, 100);
+    
     console.log(`Switching to Track ${nextTrack}`);
   };
 
@@ -244,6 +297,13 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
     
     // Force re-render
     setKey(prev => prev + 1);
+    
+    // Ensure controls are disabled
+    setTimeout(() => {
+      if (carRef.current && carRef.current.setControlsEnabled) {
+        carRef.current.setControlsEnabled(false);
+      }
+    }, 100);
     
     console.log(`Restarting Track ${currentLevel}`);
   };
@@ -337,6 +397,7 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
             // flip the car for level 2
             startRotation={currentLevel === 2 ? [0, -Math.PI, 0] : [0, Math.PI/2, 0]}
             onHudUpdate={handleHudUpdate} // Use the updated handler
+            controlsEnabled={gameStarted && !showCountdown} // Add this prop
           />
 
           <CarSound speed={hudData.speed} gear={hudData.gear} />
@@ -646,11 +707,12 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
       {/* Checkpoint Countdown for both tracks */}
       {activeCheckpoint && gameStarted && (
         <CheckpointCountdown
+          key={`checkpoint-${activeCheckpoint}`} // Add this key to force re-render
           checkpointNumber={activeCheckpoint}
           isActive={gameStarted && activeCheckpoint !== null}
           onTimeout={handleCheckpointTimeout}
           duration={10} // 10 seconds per checkpoint
-          
+          totalCheckpoints={currentLevel === 1 ? 3 : 5}
         />
       )}
 
