@@ -7,6 +7,7 @@ import {
   useRef,
   useImperativeHandle,
   useState,
+  useCallback,
 } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
 import { ExhaustParticles } from './ExhaustParticles' 
@@ -17,10 +18,11 @@ interface CarProps {
   startPosition?: [number, number, number]
   disabled?: boolean
   startRotation?: [number, number, number]
+  controlsEnabled?: boolean // Add this prop
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]  }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0], controlsEnabled = true  }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
       mass: 1200,
       position: [startPosition[0], 0.26, startPosition[2]],
@@ -41,7 +43,7 @@ const Car = forwardRef<Mesh, CarProps>(
     const [speed, setSpeed] = useState(0)
     const [gear, setGear] = useState('N')
     const [isBraking, setIsBraking] = useState(false)
-    const [boostActive, setBoostActive] = useState(false) // New state for boost
+    const [boostActive, setBoostActive] = useState(false)
     const keys = useKeyboard()
 
     const velocity = useRef([0, 0, 0])
@@ -50,29 +52,53 @@ const Car = forwardRef<Mesh, CarProps>(
     const currentSpeed = useRef(0)
     const targetSpeed = useRef(0)
     const isReversing = useRef(false)
-    const boostMultiplier = useRef(1) // Boost multiplier
-    const boostTimeRemaining = useRef(0) // Boost duration timer
+    const boostMultiplier = useRef(1)
+    const boostTimeRemaining = useRef(0)
 
     // Add this function to trigger boost from outside
-    const activateBoost = (multiplier: number = 1.5, duration: number = 2) => {
+    const activateBoost = useCallback((multiplier: number = 1.5, duration: number = 2) => {
       boostMultiplier.current = multiplier
       boostTimeRemaining.current = duration
       setBoostActive(true)
       
       // Update HUD with boost status
       onHudUpdate?.({ speed, gear, boostActive: true })
-    }
+    }, [onHudUpdate, speed, gear])
 
+    // Add method to enable/disable controls
+    const setControlsEnabled = useCallback((enabled: boolean) => {
+      // Reset car state when controls are disabled
+      if (!enabled) {
+        currentSpeed.current = 0
+        targetSpeed.current = 0
+        isReversing.current = false
+        setIsBraking(false)
+        setBoostActive(false)
+        boostMultiplier.current = 1
+        boostTimeRemaining.current = 0
+        
+        // Stop the car physically
+        api.velocity.set(0, velocity.current[1], 0)
+        api.angularVelocity.set(0, 0, 0)
+        
+        // Update HUD
+        if (speed !== 0 || gear !== 'N') {
+          setSpeed(0)
+          setGear('N')
+          onHudUpdate?.({ speed: 0, gear: 'N', boostActive: false })
+        }
+      }
+    }, [api, onHudUpdate, speed, gear])
 
-useImperativeHandle(ref, () => {
-  const mesh = physicsRef.current!
-  return Object.assign(mesh, {
-    activateBoost,
-    getSpeed: () => speed,
-    getBoostActive: () => boostActive,
-    // Add other methods you want to expose
-  })
-}, [physicsRef, speed, boostActive, activateBoost])
+    useImperativeHandle(ref, () => {
+      const mesh = physicsRef.current!
+      return Object.assign(mesh, {
+        activateBoost,
+        getSpeed: () => speed,
+        getBoostActive: () => boostActive,
+        setControlsEnabled, // Expose the controls enabled method
+      })
+    }, [physicsRef, speed, boostActive, activateBoost, setControlsEnabled])
 
     useEffect(() => {
       const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
@@ -117,20 +143,28 @@ useImperativeHandle(ref, () => {
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      if (disabled) {
-        api.velocity.set(0, velocity.current[1], 0)
-        api.angularVelocity.set(0, 0, 0)
-        currentSpeed.current = 0
-        targetSpeed.current = 0
-        isReversing.current = false
-        setIsBraking(false)
-        setBoostActive(false)
-        boostMultiplier.current = 1
-        boostTimeRemaining.current = 0
-        if (speed !== 0 || gear !== 'N') {
-          setSpeed(0)
-          setGear('N')
-          onHudUpdate?.({ speed: 0, gear: 'N', boostActive: false })
+      // Check if controls are disabled (game not started or countdown active)
+      if (!controlsEnabled || disabled) {
+        // Only reset if we haven't already
+        if (currentSpeed.current !== 0 || targetSpeed.current !== 0) {
+          currentSpeed.current = 0
+          targetSpeed.current = 0
+          isReversing.current = false
+          setIsBraking(false)
+          setBoostActive(false)
+          boostMultiplier.current = 1
+          boostTimeRemaining.current = 0
+          
+          // Stop the car physically
+          api.velocity.set(0, velocity.current[1], 0)
+          api.angularVelocity.set(0, 0, 0)
+          
+          // Update HUD if needed
+          if (speed !== 0 || gear !== 'N') {
+            setSpeed(0)
+            setGear('N')
+            onHudUpdate?.({ speed: 0, gear: 'N', boostActive: false })
+          }
         }
         return
       }
@@ -244,13 +278,12 @@ useImperativeHandle(ref, () => {
     return (
       <mesh ref={physicsRef} castShadow>
         <group position={[-0.54, 0, 0]}>
-          {/*<primitive object={scene} scale={0.006} />*/}
           <primitive object={scene} scale={35} />
         </group>
         <ExhaustParticles 
           carSpeed={speed} 
           isReversing={isReversing.current}
-          isBoosting={boostActive} // Pass boost state to particles
+          isBoosting={boostActive}
           position={[-0.4, 0, 0]} 
         />
       </mesh>

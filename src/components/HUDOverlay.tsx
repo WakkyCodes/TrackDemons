@@ -3,15 +3,19 @@ interface HUDOverlayProps {
   speed: number;
   gear: string;
   currentCheckpoint?: number;
-  boostActive?: boolean; // Add boostActive prop
+  currentLevel?: number; // Add this line
+  boostActive?: boolean;
 }
 
 export default function HUDOverlay({ 
   speed, 
   gear, 
   currentCheckpoint = 0,
-  boostActive = false // Add default value
+  currentLevel = 1, // Add default value
+  boostActive = false
 }: HUDOverlayProps) {
+  const totalCheckpoints = currentLevel === 1 ? 3 : 5;
+  
   return (
     <>
       <div
@@ -56,7 +60,7 @@ export default function HUDOverlay({
           borderTop: '1px solid #00ff88',
           paddingTop: '8px'
         }}>
-          Checkpoint: {currentCheckpoint}/3
+          Checkpoint: {currentCheckpoint}/{totalCheckpoints}
         </div>
 
         {/* Boost Indicator */}
