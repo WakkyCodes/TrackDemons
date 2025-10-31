@@ -5,6 +5,7 @@ import { Mesh } from "three";
 import MenuMusic from "./MenuSound";
 import { Settings, Volume2, VolumeX } from 'lucide-react';
 
+
 type CarModel = "car" | "bmw";
 type Difficulty = 'easy' | 'normal' | 'hard';
 
@@ -66,6 +67,16 @@ export default function Menu3D({
 }: Menu3DProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [isSoundOn, setIsSoundOn] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true); // starts unmuted
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState(0); // default official song
+
+    const handleToggleMute = () => {
+    setIsPlaying((prev) => !prev);
+  };
+
+  const handleChooseSound = (index: number) => {
+    setSelectedTrackIndex(index);
+  };
 
   const getDifficultyColor = (diff: Difficulty) => {
     if (diff === difficulty) return '#4CAF50';
@@ -85,6 +96,8 @@ export default function Menu3D({
 
 
   return (
+    
+    
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas shadows camera={{ position: [-1, 2, -3], fov: 80 }}>
         <ambientLight intensity={0.6} />
@@ -104,8 +117,13 @@ export default function Menu3D({
       </Canvas>
 
       {/* 🎵 Menu Music */}
-      <MenuMusic isPlaying={isSoundOn} />
+      <MenuMusic isPlaying={isSoundOn} selectedTrackIndex={selectedTrackIndex} />
 
+      {/* Controls */}
+      <button onClick={handleToggleMute}>
+        {isPlaying ? "Mute" : "Unmute"}
+      </button>
+      
       {/* ⚙️ Settings Button */}
       <button
         onClick={() => setShowSettings(!showSettings)}
@@ -328,6 +346,10 @@ export default function Menu3D({
           >
 
             🎵 Choose Sound
+
+            <button onClick={(e) => { e.stopPropagation(); handleChooseSound(0); }}>Track 1</button>
+            <button onClick={(e) => { e.stopPropagation(); handleChooseSound(1); }}>Track 2</button>
+            <button onClick={(e) => { e.stopPropagation(); handleChooseSound(2); }}>Track 3</button>
 
           </div>
 
