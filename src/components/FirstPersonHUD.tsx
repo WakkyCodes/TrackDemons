@@ -6,15 +6,18 @@ interface FirstPersonHUDProps {
   speed: number;
   gear: string;
   currentCheckpoint?: number;
-  boostActive?: boolean; // Add boostActive prop
+  currentLevel?: number; // Add currentLevel prop
+  boostActive?: boolean;
 }
 
 export default function FirstPersonHUD({ 
   speed, 
   gear, 
   currentCheckpoint = 0,
-  boostActive = false // Add default value
+  currentLevel = 1, // Add default value
+  boostActive = false
 }: FirstPersonHUDProps) {
+  const totalCheckpoints = currentLevel === 1 ? 3 : 5;
 
   return (
     <>
@@ -59,7 +62,7 @@ export default function FirstPersonHUD({
             pointerEvents: 'none',
           }}
         >
-          Checkpoint: {currentCheckpoint}/3
+          Checkpoint: {currentCheckpoint}/{totalCheckpoints}
         </div>
 
         {/* Boost Indicator for First Person View */}

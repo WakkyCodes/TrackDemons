@@ -155,25 +155,42 @@ const curvedWall1 = createCurvedWall(
 
       {/* Checkpoints - all checkpoints are always visible and functional */}
       <Checkpoint 
-        position={[7, 0.5, -7.2]} 
-        rotation={[0, Math.PI/2, 0]}
-        checkpointNumber={3}
-        onCheckpoint={onCheckpoint}
-      />
-      
-      <Checkpoint 
-        position={[17.39, 0.5, -22.5]} 
-        rotation={[0, Math.PI , 0]}
-        checkpointNumber={2}
-        onCheckpoint={onCheckpoint}
-      />
-      
-      <Checkpoint 
-        position={[-3.5, 0.5, -53.5]} 
-        rotation={[0, -Math.PI / 2, 0]}
-        checkpointNumber={1}
-        onCheckpoint={onCheckpoint}
-      />
+  position={[-3.5, 0.5, -53.5]} 
+  rotation={[0, -Math.PI / 2, 0]}
+  checkpointNumber={1}
+  onCheckpoint={onCheckpoint}
+/>
+
+<Checkpoint 
+  position={[17.39, 0.5, -22.5]} 
+  rotation={[0, Math.PI , 0]}
+  checkpointNumber={2}
+  onCheckpoint={onCheckpoint}
+/>
+
+
+
+<Checkpoint 
+  position={[17.35, 0.5, 80]} 
+  rotation={[0, Math.PI, 0]}
+  checkpointNumber={3}
+  onCheckpoint={onCheckpoint}
+/>
+
+<Checkpoint 
+  position={[-17, 0.5, 60]} 
+  rotation={[0, Math.PI, 0]}
+  checkpointNumber={4}
+  onCheckpoint={onCheckpoint}
+/>
+
+<Checkpoint 
+  position={[-13.5, 0.5, -10]} 
+  rotation={[0, Math.PI, 0]}
+  checkpointNumber={5}
+  onCheckpoint={onCheckpoint}
+/>
+
     </group>
   )
 }
