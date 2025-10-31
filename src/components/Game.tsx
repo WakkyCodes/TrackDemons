@@ -190,7 +190,7 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
 
   // Add this useEffect to handle the win condition
   useEffect(() => {
-    const maxCheckpoints = currentLevel === 1 ? 3 : 5; // Track1 has 3, Track2 has 5
+    
     
     const hasAllCheckpoints = currentLevel === 1 
       ? checkpoints.includes(1) && checkpoints.includes(2) && checkpoints.includes(3)
@@ -712,7 +712,7 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
           isActive={gameStarted && activeCheckpoint !== null}
           onTimeout={handleCheckpointTimeout}
           duration={10} // 10 seconds per checkpoint
-
+          
         />
       )}
 
