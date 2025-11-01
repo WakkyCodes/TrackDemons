@@ -3,7 +3,7 @@ import Menu3D from "./components/Menu3D";
 import Game from "./components/Game";
 
 type Difficulty = 'easy' | 'normal' | 'hard'
-type CarModel = 'car' | 'bmw';
+type CarModel = 'car' | 'bmw' | 'merc';
 
 export default function App() {
   const [difficulty, setDifficulty] = useState<Difficulty>('normal')

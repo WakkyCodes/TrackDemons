@@ -12,7 +12,7 @@ export default function CheckpointCountdown({
   checkpointNumber, 
   isActive, 
   onTimeout,
-  duration = 10  // 10 seconds
+  duration = 10// 10 seconds
 }: CheckpointCountdownProps) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const timerRef = useRef<number | null>(null);

@@ -7,6 +7,7 @@ import {
   useRef,
   useImperativeHandle,
   useState,
+  useCallback,
 } from 'react'
 import useKeyboard from '../hooks/useKeyboard'
 import { ExhaustParticles } from './ExhaustParticles' 
@@ -15,24 +16,25 @@ import crashSoundFile from "/sounds/car_crash.mp3"; // Place it under /public/so
 
 
 interface CarProps {
-  onHudUpdate?: (data: { speed: number; gear: string }) => void
+  onHudUpdate?: (data: { speed: number; gear: string; boostActive?: boolean }) => void
   startPosition?: [number, number, number]
-  disabled?: boolean // Add disabled prop
+  disabled?: boolean
   startRotation?: [number, number, number]
+  controlsEnabled?: boolean // Add this prop
 }
 
 const Car = forwardRef<Mesh, CarProps>(
-  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0]  }, ref) => {
+  ({ onHudUpdate, startPosition = [9, 9, -7], disabled = false, startRotation = [0, 0, 0], controlsEnabled = true  }, ref) => {
     const [physicsRef, api] = useBox<Mesh>(() => ({
-      mass: 1200, // Increased for more realistic car weight
+      mass: 1200,
       position: [startPosition[0], 0.26, startPosition[2]],
       rotation: startRotation,
-      args: [1.8, 0.5, 4.5], // Better match car dimensions (width, height, length)
-      linearDamping: 0.8,    // Increased for less sliding
-      angularDamping: 0.8,   // Increased for less rotational bounce
+      args: [1.8, 0.5, 4.5],
+      linearDamping: 0.8,
+      angularDamping: 0.8,
       material: {
-        friction: 0.3,       // Lower friction for smoother movement
-        restitution: 0.1,    // Keep low to prevent bouncing
+        friction: 0.3,
+        restitution: 0.1,
       },
       angularFactor: [0, 1, 0], // Good - only allow Y-axis rotation
       linearFactor: [1, 0, 1],  // Prevent vertical movement
@@ -65,7 +67,8 @@ const Car = forwardRef<Mesh, CarProps>(
 
     const [speed, setSpeed] = useState(0)
     const [gear, setGear] = useState('N')
-
+    const [isBraking, setIsBraking] = useState(false)
+    const [boostActive, setBoostActive] = useState(false)
     const keys = useKeyboard()
 
     const velocity = useRef([0, 0, 0])
@@ -74,6 +77,53 @@ const Car = forwardRef<Mesh, CarProps>(
     const currentSpeed = useRef(0)
     const targetSpeed = useRef(0)
     const isReversing = useRef(false)
+    const boostMultiplier = useRef(1)
+    const boostTimeRemaining = useRef(0)
+
+    // Add this function to trigger boost from outside
+    const activateBoost = useCallback((multiplier: number = 1.5, duration: number = 2) => {
+      boostMultiplier.current = multiplier
+      boostTimeRemaining.current = duration
+      setBoostActive(true)
+      
+      // Update HUD with boost status
+      onHudUpdate?.({ speed, gear, boostActive: true })
+    }, [onHudUpdate, speed, gear])
+
+    // Add method to enable/disable controls
+    const setControlsEnabled = useCallback((enabled: boolean) => {
+      // Reset car state when controls are disabled
+      if (!enabled) {
+        currentSpeed.current = 0
+        targetSpeed.current = 0
+        isReversing.current = false
+        setIsBraking(false)
+        setBoostActive(false)
+        boostMultiplier.current = 1
+        boostTimeRemaining.current = 0
+        
+        // Stop the car physically
+        api.velocity.set(0, velocity.current[1], 0)
+        api.angularVelocity.set(0, 0, 0)
+        
+        // Update HUD
+        if (speed !== 0 || gear !== 'N') {
+          setSpeed(0)
+          setGear('N')
+          onHudUpdate?.({ speed: 0, gear: 'N', boostActive: false })
+        }
+      }
+    }, [api, onHudUpdate, speed, gear])
+
+    useImperativeHandle(ref, () => {
+      const mesh = physicsRef.current!
+      return Object.assign(mesh, {
+        activateBoost,
+        getSpeed: () => speed,
+        getBoostActive: () => boostActive,
+        setControlsEnabled, // Expose the controls enabled method
+      })
+    }, [physicsRef, speed, boostActive, activateBoost, setControlsEnabled])
 
     useEffect(() => {
       const unsubV = api.velocity.subscribe((v) => (velocity.current = v))
@@ -84,49 +134,87 @@ const Car = forwardRef<Mesh, CarProps>(
       }
     }, [api])
 
-    // Add velocity limiting to prevent extreme speeds
+    // Boost timer management
+    useFrame((_, delta) => {
+      if (boostTimeRemaining.current > 0) {
+        boostTimeRemaining.current -= delta
+        
+        if (boostTimeRemaining.current <= 0) {
+          boostTimeRemaining.current = 0
+          boostMultiplier.current = 1
+          setBoostActive(false)
+          onHudUpdate?.({ speed, gear, boostActive: false })
+        }
+      }
+    })
+
     useEffect(() => {
-      // Limit maximum velocity to prevent extreme speeds
       const interval = setInterval(() => {
         const [vx, vy, vz] = velocity.current
         const currentSpeed = Math.sqrt(vx*vx + vz*vz)
         
-        if (currentSpeed > 20) { // Cap maximum speed
-          const factor = 20 / currentSpeed
+        // Adjust max speed based on boost
+        const effectiveMaxSpeed = boostActive ? 20 * boostMultiplier.current : 20
+        
+        if (currentSpeed > effectiveMaxSpeed) {
+          const factor = effectiveMaxSpeed / currentSpeed
           api.velocity.set(vx * factor, vy, vz * factor)
         }
       }, 100)
       
       return () => clearInterval(interval)
-    }, [api])
+    }, [api, boostActive])
 
     useFrame((_, delta) => {
       if (!physicsRef.current) return
 
-      // Stop all car movement when disabled
-      if (disabled) {
-        api.velocity.set(0, velocity.current[1], 0)
-        api.angularVelocity.set(0, 0, 0)
-        currentSpeed.current = 0
-        targetSpeed.current = 0
-        isReversing.current = false
-        
-        // Update HUD to show 0 speed when disabled
-        if (speed !== 0 || gear !== 'N') {
-          setSpeed(0)
-          setGear('N')
-          onHudUpdate?.({ speed: 0, gear: 'N' })
+      // Check if controls are disabled (game not started or countdown active)
+      if (!controlsEnabled || disabled) {
+        // Only reset if we haven't already
+        if (currentSpeed.current !== 0 || targetSpeed.current !== 0) {
+          currentSpeed.current = 0
+          targetSpeed.current = 0
+          isReversing.current = false
+          setIsBraking(false)
+          setBoostActive(false)
+          boostMultiplier.current = 1
+          boostTimeRemaining.current = 0
+          
+          // Stop the car physically
+          api.velocity.set(0, velocity.current[1], 0)
+          api.angularVelocity.set(0, 0, 0)
+          
+          // Update HUD if needed
+          if (speed !== 0 || gear !== 'N') {
+            setSpeed(0)
+            setGear('N')
+            onHudUpdate?.({ speed: 0, gear: 'N', boostActive: false })
+          }
         }
         return
       }
 
-      const maxSpeed = 15
-      const maxReverseSpeed = 8 // Lower max speed for reverse
-      const acceleration = 12      // Increased for more responsive control
-      const deceleration = 8       // Increased for quicker stopping
-      const turnSpeed = 3          // Reduced for smoother turning
+      // Adjust max speeds based on boost
+      const baseMaxSpeed = 15
+      const baseMaxReverseSpeed = 8
+      const maxSpeed = boostActive ? baseMaxSpeed * boostMultiplier.current : baseMaxSpeed
+      const maxReverseSpeed = boostActive ? baseMaxReverseSpeed * boostMultiplier.current : baseMaxReverseSpeed
+      
+      const acceleration = 12
+      const deceleration = 8
+      const turnSpeed = 3
 
-      // Speed control
+      // BRAKE LIGHT LOGIC
+      const wasBraking = isBraking
+      const nowBraking = keys.backward || 
+                        (keys.forward && currentSpeed.current > 0) ||
+                        (Math.abs(currentSpeed.current) > 0.5 && !keys.forward && !keys.backward)
+      
+      if (nowBraking !== wasBraking) {
+        setIsBraking(nowBraking)
+      }
+
+      // Speed control with boost consideration
       if (keys.forward) {
         targetSpeed.current = -maxSpeed
         isReversing.current = false
@@ -135,18 +223,16 @@ const Car = forwardRef<Mesh, CarProps>(
         isReversing.current = true
       } else {
         targetSpeed.current = 0
-        // Don't reset isReversing here - we want to maintain the state until we start moving forward
       }
 
-      // Smooth acceleration/deceleration with delta time
+      const effectiveAcceleration = boostActive ? acceleration * boostMultiplier.current : acceleration
+      
       const speedDiff = targetSpeed.current - currentSpeed.current
       const accelerationRate = Math.abs(speedDiff) > 0.1 ? 
-        (speedDiff > 0 ? acceleration : deceleration) : deceleration
+        (speedDiff > 0 ? effectiveAcceleration : deceleration) : deceleration
       
       currentSpeed.current += speedDiff * accelerationRate * delta
       currentSpeed.current = Math.max(-maxSpeed, Math.min(maxReverseSpeed, currentSpeed.current))
-
-      // Smoother turn control
       const turnDirection = keys.left ? 1 : keys.right ? -1 : 0
       
       if (turnDirection !== 0 && Math.abs(currentSpeed.current) > 0.5) {
@@ -154,7 +240,6 @@ const Car = forwardRef<Mesh, CarProps>(
         
         let effectiveTurnDirection = turnDirection
         
-        // Reverse turning direction when in reverse
         if (isReversing.current) {
           effectiveTurnDirection = -turnDirection
         } else if (currentSpeed.current > 0) {
@@ -162,32 +247,25 @@ const Car = forwardRef<Mesh, CarProps>(
         }
 
         const finalTurnSpeed = effectiveTurnDirection * turnSpeed * turnIntensity
-        
-        // Smooth angular velocity application
         api.angularVelocity.set(0, finalTurnSpeed, 0)
       } else {
-        // Gradual stop of rotation
         api.angularVelocity.set(0, 0, 0)
       }
 
-      // Apply movement only if significant speed
+      // Apply movement
       if (Math.abs(currentSpeed.current) > 0.1) {
         const forwardVector = new Vector3(0, 0, -1)
         const carQuaternion = new Quaternion().fromArray(rotation.current)
         const worldDirection = forwardVector.applyQuaternion(carQuaternion)
         
-        // Use lerp for smoother direction changes
         worldDirection.multiplyScalar(currentSpeed.current)
         
         const currentVel = new Vector3(velocity.current[0], velocity.current[1], velocity.current[2])
         const targetVel = new Vector3(worldDirection.x, 0, worldDirection.z)
         
-        // Smooth velocity transition
         currentVel.lerp(targetVel, 5 * delta)
-        
         api.velocity.set(currentVel.x, velocity.current[1], currentVel.z)
       } else {
-        // Gradual stop
         currentSpeed.current = 0
         const currentVel = new Vector3(velocity.current[0], velocity.current[1], velocity.current[2])
         currentVel.lerp(new Vector3(0, velocity.current[1], 0), 8 * delta)
@@ -199,7 +277,6 @@ const Car = forwardRef<Mesh, CarProps>(
       const speedMs = Math.sqrt(vx * vx + vz * vz)
       const speedKmh = Math.abs(speedMs * 3.6)
 
-      // Determine gear with reverse support
       let currentGear = 'N'
       
       if (speedKmh === 0) {
@@ -207,33 +284,32 @@ const Car = forwardRef<Mesh, CarProps>(
       } else if (isReversing.current) {
         currentGear = 'R'
       } else {
-        // Forward gears
         if (speedKmh < 10) currentGear = '1'
         else if (speedKmh < 22) currentGear = '2'
         else if (speedKmh < 30) currentGear = '3'
         else currentGear = '4'
       }
 
-      // Update state and parent
+      // Update state and parent with boost status
       if (Math.abs(speedKmh - speed) > 0.5 || currentGear !== gear) {
         setSpeed(speedKmh)
         setGear(currentGear)
-        onHudUpdate?.({ speed: speedKmh, gear: currentGear })
+        onHudUpdate?.({ speed: speedKmh, gear: currentGear, boostActive })
       }
     })
 
-    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car.glb`)
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/car22.glb`)
 
     return (
       <mesh ref={physicsRef} castShadow>
-        <group position={[-2.5, 0, 0]}>
-          <primitive object={scene} scale={0.006} />
+        <group position={[-0.54, 0, 0]}>
+          <primitive object={scene} scale={35} />
         </group>
-         {}
         <ExhaustParticles 
           carSpeed={speed} 
           isReversing={isReversing.current}
-          position={[-0.4, 0, 0]} 
+          isBoosting={boostActive}
+          position={[-0.6, 0, 0]} 
         />
       </mesh>
     )

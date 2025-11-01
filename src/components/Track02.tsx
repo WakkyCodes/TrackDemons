@@ -1,5 +1,7 @@
 // Track02.tsx
-import { useGLTF } from '@react-three/drei'
+import { useGLTF, useAnimations } from '@react-three/drei'
+import { useEffect, useRef } from 'react'
+import { Group } from 'three'
 import ColliderBox from './ColliderBox'
 import Checkpoint from './Checkpoint'
 
@@ -38,9 +40,65 @@ interface Track02Props {
   showCheckpoints?: boolean; 
 }
 
-export default function Track02({ onCheckpoint, activeCheckpoint, showCheckpoints = true }: Track02Props) {
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`)
+export default function Track02({ onCheckpoint }: Track02Props) {
+  const group = useRef<Group>(null)
+  const { scene, animations } = useGLTF(`${import.meta.env.BASE_URL}models/track02-draco.glb`)
+  const { actions, mixer } = useAnimations(animations, group)
 
+  useEffect(() => {
+  if (!actions) {
+    console.warn('No actions available')
+    return
+  }
+
+  console.log('Available animations:', Object.keys(actions))
+
+  const playedActions: string[] = []
+
+  // Play movingcarAction at normal speed
+  if (actions.movingcarAction) {
+    const action = actions.movingcarAction
+    action.reset()
+    action.timeScale = 0.6 // Normal speed (1x)
+    action.play()
+    playedActions.push('movingcarAction')
+    console.log('Playing movingcarAction at 1x speed')
+  } else {
+    console.warn('movingcarAction not found')
+  }
+
+  // Play movingcarAction2 at different speed
+  if (actions.movingcarAction2) {
+    const action = actions.movingcarAction2
+    action.reset()
+    action.timeScale = 0.7 // 1.5x faster (or 0.5 for half speed)
+    action.play()
+    playedActions.push('movingcarAction2')
+    console.log('Playing movingcarAction2 at 1.5x speed')
+  } else {
+    console.warn('movingcarAction2 not found')
+  }
+
+  // Cleanup function
+  return () => {
+    playedActions.forEach(animName => {
+      if (actions[animName]) {
+        actions[animName].stop()
+      }
+    })
+  }
+}, [actions])
+
+  // Update mixer on each frame for smooth animation
+  useEffect(() => {
+    if (!mixer) return
+
+    const interval = setInterval(() => {
+      mixer.update(0.01) // Update with delta time
+    }, 10)
+
+    return () => clearInterval(interval)
+  }, [mixer])
   // Define your wall boxes here
   const wallBoxes: { 
     position: [number, number, number]; 
@@ -77,7 +135,7 @@ const curvedWall1 = createCurvedWall(
   
 
   return (
-    <>
+    <group ref={group}>
       <primitive object={scene} />
 
       {/* Render straight walls */}
@@ -98,28 +156,42 @@ const curvedWall1 = createCurvedWall(
 
       {/* Checkpoints - all checkpoints are always visible and functional */}
       <Checkpoint 
-        position={[7, 0.5, -7.2]} 
-        rotation={[0, Math.PI/2, 0]}
-        checkpointNumber={3}
-        onCheckpoint={activeCheckpoint === 3 ? onCheckpoint : undefined}
-        visible={showCheckpoints}
-      />
-      
-      <Checkpoint 
-        position={[17.39, 0.5, -22.5]} 
-        rotation={[0, Math.PI , 0]}
-        checkpointNumber={2}
-        onCheckpoint={activeCheckpoint === 2 ? onCheckpoint : undefined}
-        visible={showCheckpoints}
-      />
-      
-      <Checkpoint 
-        position={[-3.5, 0.5, -53.5]} 
-        rotation={[0, -Math.PI / 2, 0]}
-        checkpointNumber={1}
-        onCheckpoint={activeCheckpoint === 1 ? onCheckpoint : undefined}
-        visible={showCheckpoints}
-      />
-    </>
+  position={[-3.5, 0.5, -53.5]} 
+  rotation={[0, -Math.PI / 2, 0]}
+  checkpointNumber={1}
+  onCheckpoint={onCheckpoint}
+/>
+
+<Checkpoint 
+  position={[17.39, 0.5, -22.5]} 
+  rotation={[0, Math.PI , 0]}
+  checkpointNumber={2}
+  onCheckpoint={onCheckpoint}
+/>
+
+
+
+<Checkpoint 
+  position={[17.35, 0.5, 80]} 
+  rotation={[0, Math.PI, 0]}
+  checkpointNumber={3}
+  onCheckpoint={onCheckpoint}
+/>
+
+<Checkpoint 
+  position={[-17, 0.5, 60]} 
+  rotation={[0, Math.PI, 0]}
+  checkpointNumber={4}
+  onCheckpoint={onCheckpoint}
+/>
+
+<Checkpoint 
+  position={[-13.5, 0.5, -10]} 
+  rotation={[0, Math.PI, 0]}
+  checkpointNumber={5}
+  onCheckpoint={onCheckpoint}
+/>
+
+    </group>
   )
 }

@@ -30,8 +30,6 @@ export default function SimpleCheckpoint({
       if (!triggered && e.body) {
         setTriggered(true);
         onCheckpoint?.(checkpointNumber);
-        console.log(`Checkpoint ${checkpointNumber} reached!`);
-        
         // Visual feedback
         setTimeout(() => setTriggered(false), 2000);
       }

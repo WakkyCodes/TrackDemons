@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 
 const TRACKLIST = [
-  "/TrackDemons/sounds/track1.mp3", // Default official song
-  "/TrackDemons/sounds/track2.mp3",
-  "/TrackDemons/sounds/track3.mp3",
+  "/sounds/track1.mp3", // Default official song
+  "/sounds/track2.mp3",
+  "/sounds/track3.mp3",
 ];
 
 type MenuMusicProps = {

@@ -7,7 +7,7 @@ interface CarSoundProps {
 }
 
 // Define the single sound file to use
-const SINGLE_ENGINE_SOUND_FILE = '/TrackDemons/sounds/engine_2.mp3'; 
+const SINGLE_ENGINE_SOUND_FILE = '/sounds/engine_2.mp3'; 
 
 const CarSound: React.FC<CarSoundProps> = ({ speed, gear/*, onInteractionStatusChange*/ }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null)
