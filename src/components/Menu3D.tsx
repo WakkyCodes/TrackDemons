@@ -152,7 +152,7 @@ export default function Menu3D({
     position: "absolute",
     top: "20px",
     right: "80px",
-    backgroundColor: "rgba(245, 243, 243, 0.6)",
+    backgroundColor: "rgba(10, 10, 10, 0.6)",
     border: "none",
     borderRadius: "50%",
     width: "50px",

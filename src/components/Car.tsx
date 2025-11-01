@@ -11,6 +11,8 @@ import {
 import useKeyboard from '../hooks/useKeyboard'
 import { ExhaustParticles } from './ExhaustParticles' 
 import { useGLTF } from '@react-three/drei'
+import crashSoundFile from "/sounds/car_crash.mp3"; // Place it under /public/sounds or /assets/sounds
+
 
 interface CarProps {
   onHudUpdate?: (data: { speed: number; gear: string }) => void
@@ -34,7 +36,30 @@ const Car = forwardRef<Mesh, CarProps>(
       },
       angularFactor: [0, 1, 0], // Good - only allow Y-axis rotation
       linearFactor: [1, 0, 1],  // Prevent vertical movement
+
+        // 👇 New crash sound handler
+            onCollide: (e) => {
+      // `e.contact.impactVelocity` is the correct, supported property
+      const impactVelocity = e.contact.impactVelocity ?? 0;
+
+      // Only play a sound if the impact is strong enough
+      if (impactVelocity > 2) {
+        const crash = new Audio(crashSoundFile);
+        crash.volume = Math.min(1, impactVelocity / 10); // Scale by strength
+        crash.play().catch(() => {});
+      }
+    },
+
+
     }))
+
+    const crashSoundRef = useRef<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+      crashSoundRef.current = new Audio(crashSoundFile);
+      crashSoundRef.current.volume = 1;
+    }, []);
+
 
     useImperativeHandle(ref, () => physicsRef.current!, [physicsRef])
 
