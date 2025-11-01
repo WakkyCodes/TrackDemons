@@ -238,7 +238,7 @@ const Car = forwardRef<Mesh & CarHandle, CarProps>(
           carSpeed={speed} 
           isReversing={isReversing.current}
           isBoosting={boostActive} // Pass boost state to particles
-          position={[0.6, 0, 0]}
+          position={[-0.2, 0, 0]}
         />
       </mesh>
     )

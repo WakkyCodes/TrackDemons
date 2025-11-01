@@ -284,7 +284,7 @@ const Car = forwardRef<Mesh, CarProps>(
           carSpeed={speed} 
           isReversing={isReversing.current}
           isBoosting={boostActive}
-          position={[-0.4, 0, 0]} 
+          position={[-0.6, 0, 0]} 
         />
       </mesh>
     )

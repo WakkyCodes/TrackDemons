@@ -43,6 +43,21 @@ const carComponents = {
   merc: Merc
 }
 
+const stopCarMovement = (carRef: React.RefObject<Mesh & CarHandle>) => {
+  if (carRef.current && (carRef.current as any).body) {
+    const body = (carRef.current as any).body;
+    // Stop all motion
+    body.velocity.set(0, 0, 0);
+    body.angularVelocity.set(0, 0, 0);
+    // Optionally re-sync position if physics drifted
+    body.sleep();
+  }
+  if (carRef.current && carRef.current.setControlsEnabled) {
+    carRef.current.setControlsEnabled(false);
+  }
+};
+
+
 export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
   // Update the ref type to include both Mesh and CarHandle
   const carRef = useRef<Mesh & CarHandle>(null)
@@ -121,12 +136,12 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
     // Reset to the checkpoint that timed out (not previous one)
     setGameFailed(true);
     setFailedCheckpoint(checkpointNumber);
-    setGameStarted(false); // Stop the game
-    
-    // Disable car controls when game fails
     if (carRef.current && carRef.current.setControlsEnabled) {
       carRef.current.setControlsEnabled(false);
     }
+    setGameStarted(false); // Stop the game
+    
+    
   };
 
   const handleRestartGame = () => {
@@ -283,7 +298,6 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
       }
     }, 100);
     
-    console.log(`Switching to Track ${nextTrack}`);
   };
 
   // Add this function to handle restarting the same track after winning
@@ -307,7 +321,6 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
       }
     }, 100);
     
-    console.log(`Restarting Track ${currentLevel}`);
   };
 
   // Restore track-specific checkpoints when switching tracks
