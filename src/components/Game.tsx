@@ -43,19 +43,6 @@ const carComponents = {
   merc: Merc
 }
 
-const stopCarMovement = (carRef: React.RefObject<Mesh & CarHandle>) => {
-  if (carRef.current && (carRef.current as any).body) {
-    const body = (carRef.current as any).body;
-    // Stop all motion
-    body.velocity.set(0, 0, 0);
-    body.angularVelocity.set(0, 0, 0);
-    // Optionally re-sync position if physics drifted
-    body.sleep();
-  }
-  if (carRef.current && carRef.current.setControlsEnabled) {
-    carRef.current.setControlsEnabled(false);
-  }
-};
 
 
 export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
