@@ -6,6 +6,7 @@ import { Mesh } from 'three'
 
 import Car from './Car'
 import BMW from './BMW'
+import Merc from './Merc'
 import Track01 from './Track01'
 import Track02 from './Track02'
 import Lights from './Lights'
@@ -20,7 +21,7 @@ import CarSound from './CarSound'
 import CheckpointCountdown from './CheckpointCountdown'
 import useKeyboard from '../hooks/useKeyboard'
 
-type CarModel = 'car' | 'bmw'  
+type CarModel = 'car' | 'bmw' | 'merc' 
 
 type GameProps = {
   track: number
@@ -39,6 +40,7 @@ interface CarHandle {
 const carComponents = {
   car: Car,
   bmw: BMW,
+  merc: Merc
 }
 
 export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {

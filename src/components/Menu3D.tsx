@@ -3,7 +3,7 @@ import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 import { useRef, Suspense } from "react";
 import { Mesh } from "three";
 
-type CarModel = 'car' | 'bmw';
+type CarModel = 'car' | 'bmw' | 'merc';
 
 type Menu3DProps = {
   onSelectTrack: (track: number) => void;
@@ -16,13 +16,22 @@ const CAR_CONFIGS = {
     path: `${import.meta.env.BASE_URL}models/car22.glb`,
     scale: 80,
     position: [0, -0.20, 0] as [number, number, number],
+    rotation: [0, 0, 0] as [number, number, number],
     name: "Subaru"
   },
   bmw: {
     path: `${import.meta.env.BASE_URL}models/bmw_m3.glb`,
     scale: 0.8,
     position: [0, -0.20, 0] as [number, number, number],
+    rotation: [0, 0, 0] as [number, number, number],
     name: "BMW M3"
+  },
+   merc: {  // Add this entire object
+    path: `${import.meta.env.BASE_URL}models/merc_g.glb`,
+    scale: 0.03, // Adjust based on your model size
+    position: [1.9, -0.20, 0] as [number, number, number],
+    rotation: [0, -Math.PI/4, 0] as [number, number, number],
+    name: "Mercedes G-Wagon"
   }
 };
 
@@ -32,13 +41,17 @@ function MenuCar({ carModel }: { carModel: CarModel }) {
   const { scene } = useGLTF(config.path);
 
   useFrame((_, delta) => {
-    if (carRef.current) {
+  if (carRef.current && carModel !== 'merc') {
       carRef.current.rotation.y += delta * 0.5;
     }
   });
 
   return (
-    <mesh ref={carRef} position={config.position} castShadow>
+    <mesh ref={carRef} 
+      position={config.position} 
+      rotation={config.rotation || [0, 0, 0]} 
+      castShadow
+      >
       <primitive object={scene.clone()} scale={config.scale} />
     </mesh>
   );
@@ -115,6 +128,22 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
           }}
         >
           {CAR_CONFIGS.bmw.name}
+        </button>
+        <button
+          onClick={() => onCarChange('merc')}
+          style={{
+            padding: "10px 20px",
+            fontSize: "16px",
+            backgroundColor: selectedCar === 'merc' ? "#4CAF50" : "#555",
+            color: "white",
+            border: selectedCar === 'merc' ? "2px solid #4CAF50" : "2px solid transparent",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "all 0.3s",
+          }}
+        >
+          {CAR_CONFIGS.merc.name}
         </button>
       </div>
 

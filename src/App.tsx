@@ -2,7 +2,7 @@ import { useState } from "react";
 import Menu3D from "./components/Menu3D";
 import Game from "./components/Game";
 
-type CarModel = 'car' | 'bmw';
+type CarModel = 'car' | 'bmw' | 'merc';
 
 export default function App() {
   const [selectedTrack, setSelectedTrack] = useState<number | null>(null);
