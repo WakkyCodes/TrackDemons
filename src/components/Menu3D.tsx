@@ -9,6 +9,8 @@ type Menu3DProps = {
   onSelectTrack: (track: number) => void;
   selectedCar: CarModel;
   onCarChange: (car: CarModel) => void;
+  completedTracks: number[];
+  onResetProgress?: () => void; 
 };
 
 const CAR_CONFIGS = {
@@ -64,7 +66,13 @@ function MapMenuScene() {
   return <primitive object={scene} />;
 }
 
-export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu3DProps) {
+export default function Menu3D({ onSelectTrack, 
+  selectedCar, 
+  onCarChange,
+  completedTracks,
+  onResetProgress
+}: Menu3DProps) {
+  const isTrack2Unlocked = completedTracks.includes(1);
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas shadows camera={{ position: [-1, 2, -3], fov: 80 }}>
@@ -84,6 +92,53 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
       </Canvas>
 
       {/* Car Selection UI */}
+      {/* Progress indicator - top left */}
+      
+      <div
+        style={{
+          position: "absolute",
+          top: "65px",
+          left: "20px",
+          background: "rgba(0, 0, 0, 0.7)",
+          padding: "10px 20px",
+          borderRadius: "8px",
+          color: "white",
+          fontSize: "14px",
+          fontWeight: "bold",
+        }}
+      >
+        <div>Progress: {completedTracks.length}/2 Tracks</div>
+        {completedTracks.includes(1) && (
+          <div style={{ color: "#4CAF50", fontSize: "12px" }}>✓ Track 1 Complete</div>
+        )}
+        {completedTracks.includes(2) && (
+          <div style={{ color: "#4CAF50", fontSize: "12px" }}>✓ Track 2 Complete</div>
+        )}
+      </div>
+
+      {/* Optional: Reset button for testing - top right */}
+      {onResetProgress && completedTracks.length > 0 && (
+        <button
+          onClick={onResetProgress}
+          style={{
+            position: "absolute",
+            bottom: "10px",
+            right: "20px",
+            padding: "8px 16px",
+            backgroundColor: "#f44336",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "bold",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+          }}
+        >
+          🔄 Reset Progress
+        </button>
+      )}
+
       <div
         style={{
           position: "absolute",
@@ -192,11 +247,12 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
           Play Track 1
         </button>
         <button
-          onClick={() => onSelectTrack(2)}
+          onClick={() => isTrack2Unlocked && onSelectTrack(2)}
+          disabled={!isTrack2Unlocked}
           style={{
             padding: "15px 30px",
             fontSize: "20px",
-            backgroundColor: "#2196F3",
+            backgroundColor: isTrack2Unlocked ? "#2196F3" : "#555",
             color: "white",
             border: "none",
             borderRadius: "8px",
@@ -205,9 +261,51 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange }: Menu
             boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
           }}
         >
-          Play Track 2
+          {isTrack2Unlocked ? "Play Track 2" : "🔒 Track 2 Locked"}
         </button>
       </div>
+       {/* Lock message */}
+      {!isTrack2Unlocked && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "100px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            color: "#ffaa00",
+            fontSize: "16px",
+            fontWeight: "bold",
+            textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
+            textAlign: "center",
+          }}
+        >
+          Complete Track 1 to unlock Track 2!
+        </div>
+      )}
+
+      {/* Completion celebration */}
+      {completedTracks.includes(1) && completedTracks.includes(2) && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: "rgba(0, 0, 0, 0.8)",
+            padding: "30px 50px",
+            borderRadius: "15px",
+            color: "#FFD700",
+            fontSize: "32px",
+            fontWeight: "bold",
+            textShadow: "0 0 10px rgba(255, 215, 0, 0.5)",
+            textAlign: "center",
+            border: "3px solid #FFD700",
+            pointerEvents: "none",
+          }}
+        >
+          🏆 ALL TRACKS COMPLETE! 🏆
+        </div>
+      )}
     </div>
   );
 }

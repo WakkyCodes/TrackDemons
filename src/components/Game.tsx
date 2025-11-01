@@ -27,6 +27,7 @@ type GameProps = {
   track: number
   selectedCar: CarModel 
   onBackToMenu: () => void
+  onTrackComplete?: (trackNumber: number) => void
 }
 
 // Define the car handle interface to match what we created in Car.tsx
@@ -45,7 +46,12 @@ const carComponents = {
 
 
 
-export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
+export default function Game({ 
+    track, 
+    selectedCar, 
+    onBackToMenu,
+    onTrackComplete // Add this
+  }: GameProps){
   // Update the ref type to include both Mesh and CarHandle
   const carRef = useRef<Mesh & CarHandle>(null)
   const [isFirstPerson, setIsFirstPerson] = useState(false)
@@ -206,13 +212,15 @@ export default function Game({ track, selectedCar, onBackToMenu }: GameProps) {
       setCompletedTrack(currentLevel);
       setGameStarted(false);
       setActiveCheckpoint(null);
+
+      onTrackComplete?.(currentLevel);
       
       // Disable car controls when game is won
       if (carRef.current && carRef.current.setControlsEnabled) {
         carRef.current.setControlsEnabled(false);
       }
     }
-  }, [checkpoints, gameStarted, gameWon, currentLevel]);
+  }, [checkpoints, gameStarted, gameWon, currentLevel, onTrackComplete]);
 
   const handleBackToMenuFromFailure = () => {
     setGameFailed(false);
