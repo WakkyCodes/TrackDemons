@@ -1,6 +1,7 @@
 // Track01.tsx
-import { useGLTF } from '@react-three/drei'
-import { useMemo } from 'react';
+import { useGLTF, useAnimations } from '@react-three/drei'
+import { useMemo, useEffect, useRef } from 'react';
+import { Group } from 'three'
 import ColliderBox from './ColliderBox'
 import ColliderWall from './ColliderWall';
 import Ramp from './Ramp'
@@ -17,7 +18,50 @@ interface Track01Props {
 }
 
 export default function Track01({ onCheckpoint , showCheckpoints = true }: Track01Props) {
-  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/track01.glb`);
+  const group = useRef<Group>(null)
+  const { scene, animations } = useGLTF(`${import.meta.env.BASE_URL}models/track01.glb`);
+  const { actions, mixer } = useAnimations(animations, group)
+
+  // Animation setup - same as Track02
+  useEffect(() => {
+    if (!actions) {
+      console.warn('No actions available')
+      return
+    }
+
+    console.log('Available animations:', Object.keys(actions))
+
+    const playedActions: string[] = []
+
+    // Play all available animations
+   if (actions.Object_2Action) {
+    const action = actions.Object_2Action
+    action.reset()
+    action.timeScale = 0.2
+    action.play()
+    playedActions.push('Object_2Action')
+    console.log('Playing Object_2Action')
+  }
+    // Cleanup function
+    return () => {
+      playedActions.forEach(animName => {
+        if (actions[animName]) {
+          actions[animName].stop()
+        }
+      })
+    }
+  }, [actions])
+
+  // Update mixer on each frame for smooth animation
+  useEffect(() => {
+    if (!mixer) return
+
+    const interval = setInterval(() => {
+      mixer.update(0.01) // Update with delta time
+    }, 10)
+
+    return () => clearInterval(interval)
+  }, [mixer])
 
   const bounds = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
@@ -28,8 +72,9 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       center: box.getCenter(new THREE.Vector3()),
     };
   }, [scene]);
+
   return (
-    <>
+    <group ref={group}>
       {/* This renders the visible track model. It has no physics itself. */}
       <primitive object={scene} />
 
@@ -67,13 +112,11 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
 
       {/* All the invisible walls (ColliderBoxes) go here */}
       
-      {/* <ColliderBox position={[-2.8, 0, 9.55]} rotation={[0, Math.PI / 4, 0]} />
-      <ColliderBox position={[-4.15, 0, 11.9]} rotation={[0, Math.PI / 3, 0]} /> */}
-
       {/*the three threes in the middle */}
       <ColliderBox position={[-2.8, 0, 9.55]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 4, 0]} visible={true} />
       <ColliderBox position={[-4.15, 0, 11.9]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 3, 0]} visible={true} />
       <ColliderBox position={[-5.5, 0, 10.6]} scale={[1.4, 6,1]} rotation={[0, Math.PI / 3, 0]}  visible={true} />
+      
       {/* This renders the ramp, both visibly and with its own physics */}
       <Ramp />
       
@@ -105,13 +148,6 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
         onCheckpoint={onCheckpoint}
         visible={showCheckpoints}
       />
-
-       {/* Optional visible mesh (only renders if geometry and colorMap are passed) 
-      {geometry && colorMap && (
-        <mesh geometry={geometry}>
-          <meshBasicMaterial toneMapped={false} map={colorMap} />
-        </mesh>
-      )}*/}
 
      {/*on the side opposite to the stairs(other side of the road) */}
       <ColliderBox position={[3, 1, -0.3]} scale={[8, 3,1]} />
@@ -145,9 +181,7 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       <ColliderBox position={[17, 0, 14]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 6, 0 ]}/>
       <ColliderBox position={[15, 0, 1]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 6, 0 ]}/>
       
-
-      {}
       <ColliderBox position={[1, 0, 6]} scale={[8, 3,1]} rotation={[0, Math.PI / 5, 0]}/>
-    </>
+    </group>
   );
 }

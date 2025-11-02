@@ -59,7 +59,7 @@ export default function Track02({ onCheckpoint }: Track02Props) {
   if (actions.movingcarAction) {
     const action = actions.movingcarAction
     action.reset()
-    action.timeScale = 0.6 // Normal speed (1x)
+    action.timeScale = 0.3 // Normal speed (1x)
     action.play()
     playedActions.push('movingcarAction')
     console.log('Playing movingcarAction at 1x speed')
@@ -71,7 +71,7 @@ export default function Track02({ onCheckpoint }: Track02Props) {
   if (actions.movingcarAction2) {
     const action = actions.movingcarAction2
     action.reset()
-    action.timeScale = 0.7 // 1.5x faster (or 0.5 for half speed)
+    action.timeScale = 0.4 // 1.5x faster (or 0.5 for half speed)
     action.play()
     playedActions.push('movingcarAction2')
     console.log('Playing movingcarAction2 at 1.5x speed')
