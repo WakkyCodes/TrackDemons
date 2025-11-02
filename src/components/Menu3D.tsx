@@ -367,43 +367,71 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange,onReset
 
 
 
-          {/* Other Options */}
-
-          <div
-
-            style={{ marginBottom: "10px", cursor: "pointer", padding: '8px', borderRadius: '5px' }}
-
-            onClick={() => alert("🎵 Choose Sound clicked")}
-
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-
-            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-
-          >
-
-            🎵 Choose Sound
-
-            <button onClick={(e) => { e.stopPropagation(); handleChooseSound(0); }}>Track 1</button>
-            <button onClick={(e) => { e.stopPropagation(); handleChooseSound(1); }}>Track 2</button>
-            <button onClick={(e) => { e.stopPropagation(); handleChooseSound(2); }}>Track 3</button>
-
+          {/* Music Selection */}
+          <div style={{ marginBottom: '20px' }}> {/* Matches 'Difficulty' container margin */}
+            
+            {/* 1. This is the new "left-aligned" title */}
+            <div style={{ fontSize: '14px', marginBottom: '10px', color: '#aaa' }}>
+              🎵 Choose Sound
+            </div>
+            
+            {/* 2. This container adds the 'gap' between buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleChooseSound(0); }}
+                style={{
+                  padding: '10px 15px',
+                  backgroundColor: selectedTrackIndex === 0 ? '#4CAF50' : '#555',
+                  border: selectedTrackIndex === 0 ? '2px solid #4CAF50' : '2px solid transparent',
+                  borderRadius: '5px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.2s',
+                  textAlign: 'left' // Aligns text nicely
+                }}
+              >
+                San Andreas
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleChooseSound(1); }}
+                style={{
+                  padding: '10px 15px',
+                  backgroundColor: selectedTrackIndex === 1 ? '#4CAF50' : '#555',
+                  border: selectedTrackIndex === 1 ? '2px solid #4CAF50' : '2px solid transparent',
+                  borderRadius: '5px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.2s',
+                  textAlign: 'left'
+                }}
+              >
+                Leonida
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleChooseSound(2); }}
+                style={{
+                  padding: '10px 15px',
+                  backgroundColor: selectedTrackIndex === 2 ? '#4CAF50' : '#555',
+                  border: selectedTrackIndex === 2 ? '2px solid #4CAF50' : '2px solid transparent',
+                  borderRadius: '5px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.2s',
+                  textAlign: 'left'
+                }}
+              >
+                San Fierro
+              </button>
+            </div>
           </div>
 
-          <div
-
-            style={{ cursor: "pointer", padding: '8px', borderRadius: '5px' }}
-
-            onClick={() => alert("❓ Help clicked")}
-
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-
-            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-
-          >
-
-            ❓ Help
-
-          </div>
+         
 
         </div>
 
