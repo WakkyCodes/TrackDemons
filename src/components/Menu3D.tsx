@@ -154,15 +154,15 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange,onReset
         <Settings size={28} />
       </button>
 
-    {/* 🔊 Sound Button */}
+{/* 🔊 Play Button */}
 <button
-  onClick={() => setIsSoundOn((prev) => !prev)}
+  onClick={() => setIsSoundOn(true)}
   style={{
     position: "absolute",
     top: "20px",
     right: "80px",
-    backgroundColor: "rgba(10, 10, 10, 0.6)",
-    border: "none",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    border: "1px solid rgba(255,255,255,0.2)",
     borderRadius: "50%",
     width: "50px",
     height: "50px",
@@ -171,13 +171,40 @@ export default function Menu3D({ onSelectTrack, selectedCar, onCarChange,onReset
     justifyContent: "center",
     cursor: "pointer",
     color: "white",
-    fontSize: "22px",
-    transition: "transform 0.2s ease",
+    transition: "all 0.2s ease",
   }}
-  title={isSoundOn ? "Mute" : "Unmute"}
+  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
+  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+  title="Play Music"
 >
-  {isSoundOn ? <Volume2 size={28} /> : <VolumeX size={28} />}
+  <Volume2 size={40} color="white" />
 </button>
+
+{/* 🔇 Mute Button */}
+<button
+  onClick={() => setIsSoundOn(false)}
+  style={{
+    position: "absolute",
+    top: "20px",
+    right: "140px",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    border: "1px solid rgba(255,255,255,0.2)",
+    borderRadius: "50%",
+    width: "50px",
+    height: "50px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    color: "white",
+    transition: "all 0.2s ease",
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
+  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+  title="Mute Music"
+>
+  <VolumeX size={40} color="white" />
+</button>    
 
       
 
