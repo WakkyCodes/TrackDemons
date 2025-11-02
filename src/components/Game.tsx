@@ -242,36 +242,7 @@ export default function Game({ track, selectedCar, difficulty, onBackToMenu,onTr
     }));
   };
 
-  // Reset game state when track changes
-  const handleTrackChange = (newTrack: number) => {
-    if (!gameStarted) return
-    
-    setCurrentLevel(newTrack)
-    setGameStarted(false)
-    setShowCountdown(false)
-    setShowControls(false)
-    setActiveCheckpoint(null)
-    setBoostActive(false) // Reset boost state
-    
-    // Reset current checkpoint state but preserve track-specific states
-    setCheckpoints([])
-    setCurrentCheckpoint(0)
-    
-    // Force re-render of physics and car by changing key
-    setKey(prev => prev + 1)
-    
-    // Ensure controls are disabled
-    setTimeout(() => {
-      if (carRef.current && carRef.current.setControlsEnabled) {
-        carRef.current.setControlsEnabled(false);
-      }
-    }, 100);
-    
-    // Start countdown automatically after track change
-    setTimeout(() => {
-      setShowCountdown(true)
-    }, 500)
-  }
+  // (removed) handleTrackChange was unused — use handleSwitchTrack or call equivalent logic where needed
 
   const handleSwitchTrack = () => {
     const nextTrack = currentLevel === 1 ? 2 : 1;
