@@ -126,7 +126,7 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
 
       {/* CHECKPOINTS - All checkpoints are always visible and functional */}
       <Checkpoint 
-        position={[10.5, 0.5, -4]} 
+        position={[10.5, 0.5, 0]} 
         rotation={[0, Math.PI / 17, 0]}
         checkpointNumber={1}
         onCheckpoint={onCheckpoint}
@@ -171,6 +171,7 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       {/*the stairs*/}
       <ColliderBox position={[3, 1, -12.5]} scale={[8, 8,5]} />
 
+      {/* */}
       <ColliderBox position={[3, 1, -8.75]} scale={[6, 5, 7.5]} />
 
 
@@ -186,7 +187,16 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       <ColliderBox position={[17, 0, 14]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 6, 0 ]}/>
       <ColliderBox position={[15, 0, 1]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 6, 0 ]}/>
       
-      <ColliderBox position={[1, 0, 6]} scale={[8, 3,1]} rotation={[0, Math.PI / 5, 0]}/>
+      {/*curve */}
+      <ColliderBox position={[1, 0, 6]} scale={[8, 3,1]} rotation={[0, Math.PI / 5, 0]}/> 
+
+      <ColliderBox 
+          position={[2, 0.5, 2]} 
+          scale={[6, 3, 6]} 
+          rotation={[0, Math.PI / 10, 0]} 
+      />
+
+    
     </group>
   );
 }

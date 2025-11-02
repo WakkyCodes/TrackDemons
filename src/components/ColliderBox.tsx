@@ -13,7 +13,7 @@ export default function ColliderBox({
   position, 
   scale = [1, 1, 1], 
   rotation = [0, 0, 0],
-  visible = true // Set to true to see red boxes
+  visible = false // Default: invisible colliders
 }: ColliderBoxProps) {
   const meshRef = useRef<Mesh>(null)
 
@@ -25,8 +25,10 @@ export default function ColliderBox({
     type: 'Static',
   }), meshRef)
 
+  // Invisible collider: no mesh rendered
   if (!visible) return null
 
+  // Optional debug view (only shows when visible = true)
   return (
     <mesh ref={meshRef}>
       <boxGeometry args={scale} />
