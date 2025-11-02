@@ -20,7 +20,7 @@ import Countdown from './Countdown'
 import CarSound from './CarSound'
 import CheckpointCountdown from './CheckpointCountdown'
 import useKeyboard from '../hooks/useKeyboard'
-import MiniMapOverlay from './MiniMapOverlay'
+//import MiniMapOverlay from './MiniMapOverlay'
 
 type CarModel = 'car' | 'bmw' | 'merc'  
 type Difficulty = 'easy' | 'normal' | 'hard' 
