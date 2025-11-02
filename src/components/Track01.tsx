@@ -37,7 +37,7 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
    if (actions.Object_2Action) {
     const action = actions.Object_2Action
     action.reset()
-    action.timeScale = 0.2
+    action.timeScale = 0.3
     action.play()
     playedActions.push('Object_2Action')
     console.log('Playing Object_2Action')
