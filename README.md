@@ -33,18 +33,16 @@ Follow these simple steps to get the development environment running:
     ```sh
     git clone [https://github.com/wakkycodes/TrackDemons.git](https://github.com/wakkycodes/TrackDemons.git)
     ```
-
-2.  **Retrieve LFS objects (models, textures, etc.)**
+2.  **Navigate to the project directory**
+    ```sh
+    cd trackdemons
+    ```
+3.  **Retrieve LFS objects (models, textures, etc.)**
     ```sh
     git lfs install
     git lfs pull
     ```
     > Without this step, you may see placeholder text files instead of the actual game assets.
-
-3.  **Navigate to the project directory**
-    ```sh
-    cd trackdemons
-    ```
 
 4.  **Install dependencies**
     ```sh
