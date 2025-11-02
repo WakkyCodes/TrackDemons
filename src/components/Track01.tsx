@@ -113,9 +113,9 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       {/* All the invisible walls (ColliderBoxes) go here */}
       
       {/*the three threes in the middle */}
-      <ColliderBox position={[-2.8, 0, 9.55]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 4, 0]} visible={true} />
-      <ColliderBox position={[-4.15, 0, 11.9]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 3, 0]} visible={true} />
-      <ColliderBox position={[-5.5, 0, 10.6]} scale={[1.4, 6,1]} rotation={[0, Math.PI / 3, 0]}  visible={true} />
+      <ColliderBox position={[-2.8, 0, 9.55]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 4, 0]}  />
+      <ColliderBox position={[-4.15, 0, 11.9]} scale={[1.5, 6,1]} rotation={[0, Math.PI / 3, 0]} />
+      <ColliderBox position={[-5.5, 0, 10.6]} scale={[1.4, 6,1]} rotation={[0, Math.PI / 3, 0]}  />
       
       {/* This renders the ramp, both visibly and with its own physics */}
       <Ramp />
