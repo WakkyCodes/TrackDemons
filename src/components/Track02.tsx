@@ -1,9 +1,11 @@
 // Track02.tsx
 import { useGLTF, useAnimations } from '@react-three/drei'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { Group } from 'three'
+import * as THREE from 'three';
 import ColliderBox from './ColliderBox'
 import Checkpoint from './Checkpoint'
+import ColliderWall from './ColliderWall';
 
 const createCurvedWall = (
   centerX: number, 
@@ -122,6 +124,16 @@ export default function Track02({ onCheckpoint }: Track02Props) {
     
 
   ];
+
+   const bounds = useMemo(() => {
+      const box = new THREE.Box3().setFromObject(scene);
+      return {
+        min: box.min,
+        max: box.max,
+        size: box.getSize(new THREE.Vector3()),
+        center: box.getCenter(new THREE.Vector3()),
+      };
+    }, [scene]);
 const curvedWall1 = createCurvedWall(
   5,           // centerX
   -62,          // centerZ
@@ -137,6 +149,38 @@ const curvedWall1 = createCurvedWall(
   return (
     <group ref={group}>
       <primitive object={scene} />
+
+             {/* === Physics Walls Around Track === */}
+            <ColliderWall
+              position={[bounds.center.x, bounds.min.y - 0.5, bounds.center.z]}
+              args={[bounds.size.x, 1, bounds.size.z]}
+              color="red"
+            />
+            <ColliderWall
+              position={[bounds.center.x, bounds.max.y + 0.5, bounds.center.z]}
+              args={[bounds.size.x, 1, bounds.size.z]}
+              color="blue"
+            />
+            <ColliderWall
+              position={[bounds.min.x - 0.5, bounds.center.y, bounds.center.z]}
+              args={[1, bounds.size.y, bounds.size.z]}
+              color="green"
+            />
+            <ColliderWall
+              position={[bounds.max.x + 0.5, bounds.center.y, bounds.center.z]}
+              args={[1, bounds.size.y, bounds.size.z]}
+              color="green"
+            />
+            <ColliderWall
+              position={[bounds.center.x, bounds.center.y, bounds.max.z + 0.5]}
+              args={[bounds.size.x, bounds.size.y, 1]}
+              color="green"
+            />
+            <ColliderWall
+              position={[bounds.center.x, bounds.center.y, bounds.min.z - 0.5]}
+              args={[bounds.size.x, bounds.size.y, 1]}
+              color="green"
+            />
 
       {/* Render straight walls */}
       {wallBoxes.map((box, i) => (
