@@ -20,6 +20,7 @@ import Countdown from './Countdown'
 import CarSound from './CarSound'
 import CheckpointCountdown from './CheckpointCountdown'
 import useKeyboard from '../hooks/useKeyboard'
+import MiniMapOverlay from './MiniMapOverlay'
 
 type CarModel = 'car' | 'bmw' | 'merc'  
 type Difficulty = 'easy' | 'normal' | 'hard' 
@@ -427,6 +428,13 @@ export default function Game({ track, selectedCar, difficulty, onBackToMenu,onTr
         <CameraController target={carRef} isFirstPerson={isFirstPerson} />
         <Environment files={`${import.meta.env.BASE_URL}hdrs/overcast_4k.hdr`} background />
       </Canvas>
+
+      {/*{/* Add MiniMap Overlay 
+      <MiniMapOverlay 
+        target={carRef}
+        currentLevel={currentLevel}
+        isFirstPerson={isFirstPerson}
+      />*/}
 
       {/* Overlay sequence: Controls -> Countdown -> Game */}
       {showControls && <ControlsPopup onClose={handleControlsClose} />}

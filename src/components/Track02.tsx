@@ -121,6 +121,16 @@ export default function Track02({ onCheckpoint }: Track02Props) {
     
     { position: [-11, 0, -32], scale: [1, 1.5, 37] },   // Tower collider
     */
+
+    { position: [-16, 0, -35], scale: [1, 1.5, 49] }, //left wall 
+    { position: [0, 0, -57], scale: [49, 1.5, 1] }, // first back wall
+    
+    { position: [-9, 0, -32], scale: [1, 1.5, 37] },   // right wall
+    
+    { position: [1, 0, -51], scale: [19, 1.5, 1] },//second back wall
+    {position: [12, 0, -32], scale: [1, 1.5, 37] }, //the one up there ON THE OTHER LANE 
+    {position: [19, 0, -32], scale: [1, 1.5, 37] },
+
     
 
   ];
