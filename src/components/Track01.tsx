@@ -102,12 +102,12 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       <ColliderWall
         position={[bounds.center.x, bounds.center.y, bounds.max.z + 0.5]}
         args={[bounds.size.x, bounds.size.y, 1]}
-        color="yellow"
+        color="green"
       />
       <ColliderWall
         position={[bounds.center.x, bounds.center.y, bounds.min.z - 0.5]}
         args={[bounds.size.x, bounds.size.y, 1]}
-        color="yellow"
+        color="green"
       />
 
       {/* All the invisible walls (ColliderBoxes) go here */}
@@ -159,6 +159,8 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
       <ColliderBox position={[-3, 1, -5]} scale={[4, 3,1]} />
       <ColliderBox position={[-9, 1, -5]} scale={[4, 3,1]} />
 
+      
+
       {/*next to the stairs */}
       <ColliderBox position={[-8, 1, -7]} scale={[4, 3,2]} />
       <ColliderBox position={[-11.1, 1, -7]} scale={[4, 3,2]} />
@@ -168,6 +170,9 @@ export default function Track01({ onCheckpoint , showCheckpoints = true }: Track
 
       {/*the stairs*/}
       <ColliderBox position={[3, 1, -12.5]} scale={[8, 8,5]} />
+
+      <ColliderBox position={[3, 1, -8.75]} scale={[6, 5, 7.5]} />
+
 
        {/*the tree next to the stairs(above)*/}
       <ColliderBox position={[4, 1, -15]} scale={[4, 6,1]}  rotation={[0, Math.PI / 6, 0 ]}/>
