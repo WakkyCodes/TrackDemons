@@ -773,40 +773,7 @@ export default function Game({ track, selectedCar, difficulty, onBackToMenu,onTr
           gap: '10px',
         }}
       >
-        <button
-          onClick={() => handleTrackChange(1)}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: currentLevel === 1 ? '#4CAF50' : '#666',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            opacity: gameStarted ? 1 : 0.7,
-          }}
-        >
-          Track 1
-        </button>
-        <button
-          onClick={() => handleTrackChange(2)}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: currentLevel === 2 ? '#4CAF50' : '#666',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            opacity: gameStarted ? 1 : 0.7,
-          }}
-        >
-          Track 2
-        </button>
+       
       </div>
 
       {/* Top-right UI */}
