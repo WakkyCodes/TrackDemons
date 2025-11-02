@@ -442,23 +442,7 @@ export default function Game({ track, selectedCar, difficulty, onBackToMenu,onTr
       {showCountdown && (
         <Countdown onComplete={handleCountdownComplete} />
       )}
-       {/* Checkpoint Countdown for both tracks - Only show when game is active */}
-
-      {showCheckpoints && activeCheckpoint && gameStarted && !gameOver && (
-
-        <CheckpointCountdown
-
-          checkpointNumber={activeCheckpoint}
-
-          isActive={gameStarted && activeCheckpoint !== null}
-
-          onTimeout={handleCheckpointTimeout}
-
-          duration={getCheckpointDuration(difficulty)} // 10 seconds per checkpoint
-
-        />
-
-      )}
+       
 
     {gameFailed && (
         <div
@@ -750,7 +734,7 @@ export default function Game({ track, selectedCar, difficulty, onBackToMenu,onTr
       )}
 
       {/* Checkpoint Countdown for both tracks */}
-      {activeCheckpoint && gameStarted && (
+      {showCheckpoints && activeCheckpoint && gameStarted && !gameOver && (
         <CheckpointCountdown
           key={`checkpoint-${activeCheckpoint}`} // Add this key to force re-render
           checkpointNumber={activeCheckpoint}
